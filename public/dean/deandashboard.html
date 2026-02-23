@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Alliance University | Dean Portal</title>
+
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="deandashboard.css">
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<aside class="sidebar">
+    <div class="brand-text">
+        <h3>Alliance University</h3>
+        <p>Dean Office Portal</p>
+    </div>
+
+    <ul class="menu">
+        <li class="active">
+            <i class="fas fa-chart-pie"></i>
+            <span>Dashboard</span>
+        </li>
+
+        <li onclick="navigate('deanfaculty.html')">
+            <i class="fas fa-user-tie"></i>
+            <span>Faculty Management</span>
+        </li>
+
+        <li onclick="navigate('deanstudents.html')">
+            <i class="fas fa-user-graduate"></i>
+            <span>Student Management</span>
+        </li>
+
+        <li onclick="navigate('deansections.html')">
+            <i class="fas fa-users"></i>
+            <span>Sections & Mentors</span>
+        </li>
+
+        <li onclick="navigate('deanonlysections.html')">
+            <i class="fas fa-layer-group"></i>
+            <span>Sections</span>
+        </li>
+
+        <li onclick="navigate('deanreports.html')">
+            <i class="fas fa-chart-line"></i>
+            <span>Reports & Analytics</span>
+        </li>
+
+        <li class="logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </li>
+    </ul>
+</aside>
+
+<!-- ================= MAIN ================= -->
+<main class="main-content">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+        <div class="top-logo">
+            <img src="../images/AU.png" alt="Alliance University Logo">
+        </div>
+
+        <div class="profile" onclick="toggleProfile()">
+            <img id="profileImg" src="../images/profile.png">
+            <i class="fas fa-caret-down"></i>
+
+            <div id="profileMenu" class="profile-menu">
+                <p><strong>Username:</strong> <span id="pUsername"></span></p>
+                <p><strong>Email:</strong> <span id="pEmail"></span></p>
+                <p><strong>Phone:</strong> <span id="pPhone"></span></p>
+                <hr>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- DASHBOARD CARDS -->
+    <section class="cards">
+        <div class="card" onclick="navigate('deanfaculty.html')">
+            <i class="fas fa-user-tie"></i>
+            <h3>Faculty Management</h3>
+            <p>Manage faculty, departments, and roles</p>
+        </div>
+
+        <div class="card" onclick="navigate('deanstudents.html')">
+            <i class="fas fa-user-graduate"></i>
+            <h3>Student Management</h3>
+            <p>View students, sections, and profiles</p>
+        </div>
+
+        <div class="card" onclick="navigate('deansections.html')">
+            <i class="fas fa-users"></i>
+            <h3>Sections & Mentors</h3>
+            <p>Assign mentors and manage sections</p>
+        </div>
+
+        <div class="card" onclick="navigate('deanonlysections.html')">
+            <i class="fas fa-layer-group"></i>
+            <h3>Sections</h3>
+            <p>Manage sections and courses</p>
+        </div>
+
+        <div class="card" onclick="navigate('deanreports.html')">
+            <i class="fas fa-chart-line"></i>
+            <h3>Reports & Analytics</h3>
+            <p>Academic & multimodal insights</p>
+        </div>
+    </section>
+
+</main>
+
+<script>
+function navigate(page) {
+    window.location.href = "/dean/" + page;
+}
+
+function logout() {
+    window.location.href = "/dean/logout";
+}
+
+function toggleProfile() {
+    const menu = document.getElementById("profileMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+document.addEventListener("click", e => {
+    const profile = document.querySelector(".profile");
+    const menu = document.getElementById("profileMenu");
+    if (!profile.contains(e.target)) menu.style.display = "none";
+});
+
+fetch("/dean/dashboard/profile")
+.then(res => {
+    if (!res.ok) window.location.href = "/dean/login";
+    return res.json();
+})
+.then(d => {
+    pUsername.textContent = d.username;
+    pEmail.textContent = d.email;
+    pPhone.textContent = d.phone;
+    if (d.profile_image) profileImg.src = "/" + d.profile_image;
+});
+</script>
+
+</body>
+</html>

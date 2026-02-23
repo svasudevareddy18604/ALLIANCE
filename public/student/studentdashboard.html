@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>Student Dashboard | Alliance University</title>
+
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link rel="stylesheet" href="../dean/deandashboard.css">
+
+    <style>
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 240px;
+            background: linear-gradient(180deg, #1680ae, #203a43, #2c5364);
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 240px;
+            right: 0;
+            z-index: 10;
+            background: #cd8648;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding-top: 100px;
+            background: #f6f8fb;
+            min-height: 100vh;
+        }
+
+        /* ===============================
+           IMAGE MODAL (NEW)
+        =============================== */
+        .image-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-modal img {
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 6px solid #fff;
+            animation: zoomIn 0.25s ease;
+        }
+
+        .image-modal .close-btn {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-size: 32px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .profile img {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand-text">
+            <h3>Alliance University</h3>
+            <p>Student Portal</p>
+        </div>
+
+        <ul class="menu">
+            <li class="active"><i class="fas fa-home"></i> Dashboard</li>
+            <li onclick="navigate('survey.html')"><i class="fas fa-poll"></i> Take Survey</li>
+            <li onclick="navigate('upload-video.html')"><i class="fas fa-video"></i> Upload Video</li>
+            <li onclick="navigate('studentacademicdata.html')"><i class="fas fa-graduation-cap"></i> Academic Results</li>
+            <li onclick="navigate('reports.html')"><i class="fas fa-chart-line"></i> Reports</li>
+            <li onclick="navigate('feedback.html')"><i class="fas fa-comments"></i> Feedback</li>
+            <li onclick="navigate('mentor.html')"><i class="fas fa-user-tie"></i> Mentor</li>
+            <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</li>
+        </ul>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <div class="top-logo">
+                <img src="../images/AU.png" alt="Alliance University Logo">
+            </div>
+
+            <div class="profile" onclick="toggleProfile()">
+                <img id="profileImg"
+                     src="https://i.postimg.cc/zfvsMNjZ/profileicon.jpg"
+                     onclick="openImageModal(event)">
+                <span id="studentName">Student</span>
+                <i class="fas fa-caret-down"></i>
+
+                <div id="profileMenu" class="profile-menu">
+                    <p><strong>Name:</strong> <span id="pName"></span></p>
+                    <p><strong>Register No:</strong> <span id="pReg"></span></p>
+                    <p><strong>Section:</strong> <span id="pSection"></span></p>
+                    <hr>
+                    <button onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD CARDS -->
+        <section class="cards">
+            <div class="card" onclick="navigate('survey.html')"><i class="fas fa-poll"></i><h3>Take Survey</h3><ul>View Survyes here </ul></div>
+            <div class="card" onclick="navigate('upload-video.html')"><i class="fas fa-video"></i><h3>Upload Video</h3><ul>upload your mock videos</div></ul></upload></div>
+            <div class="card" onclick="navigate('studentacademicdata.html')"><i class="fas fa-graduation-cap"></i><h3>Academic Results</h3><ul>View your Academic records here</ul></div>
+            <div class="card" onclick="navigate('reports.html')"><i class="fas fa-chart-line"></i><h3>Reports</h3><ul>Check your reports here</ul></div>
+            <div class="card" onclick="navigate('feedback.html')"><i class="fas fa-comments"></i><h3>Feedback</h3><ul>Open to check feedback</ul></div>
+            <div class="card" onclick="navigate('mentor.html')"><i class="fas fa-user-tie"></i><h3>Mentor</h3><ul>Your assiged mentor</ul></div>
+        </section>
+
+    </main>
+
+    <!-- IMAGE MODAL -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal(event)">
+        <span class="close-btn">&times;</span>
+        <img id="modalImg">
+    </div>
+
+    <script>
+        const DEFAULT_PROFILE = "https://i.postimg.cc/zfvsMNjZ/profileicon.jpg";
+        let lastProfileImage = "";
+
+        function navigate(page) {
+            window.location.href = "/student/" + page;
+        }
+
+        function toggleProfile() {
+            const menu = document.getElementById("profileMenu");
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
+        function logout() {
+            window.location.href = "/student/logout";
+        }
+
+        function openImageModal(e) {
+            e.stopPropagation();
+            const modal = document.getElementById("imageModal");
+            document.getElementById("modalImg").src =
+                document.getElementById("profileImg").src;
+            modal.style.display = "flex";
+        }
+
+        function closeImageModal(e) {
+            if (e.target.id === "imageModal" || e.target.className === "close-btn") {
+                document.getElementById("imageModal").style.display = "none";
+            }
+        }
+
+        function fetchProfile() {
+            fetch("/student/dashboard/profile", { credentials: "include" })
+                .then(res => {
+                    if (!res.ok) window.location.href = "/";
+                    return res.json();
+                })
+                .then(data => {
+                    document.getElementById("pName").textContent = data.name;
+                    document.getElementById("pReg").textContent = data.register_no;
+                    document.getElementById("pSection").textContent = data.section;
+                    document.getElementById("studentName").textContent = data.name;
+
+                    const img = data.profile_image || DEFAULT_PROFILE;
+
+                    if (img !== lastProfileImage) {
+                        document.getElementById("profileImg").src = img;
+                        lastProfileImage = img;
+                    }
+                });
+        }
+
+        // Initial load
+        fetchProfile();
+
+        // 🔁 Auto-update every 5 seconds
+        setInterval(fetchProfile, 5000);
+    </script>
+
+</body>
+</html>

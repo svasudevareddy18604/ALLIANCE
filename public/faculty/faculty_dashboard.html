@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Faculty Dashboard | Alliance University</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma}
+body{background:#f4f7fb}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;width:240px;height:100vh;background:linear-gradient(180deg,#1f4e79,#16324f,#0f2437)}
+.brand-text{padding:26px 20px;border-bottom:1px solid rgba(255,255,255,.15)}
+.brand-text h3{color:#fff;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px}
+.menu{list-style:none;padding:18px 0}
+.menu li{padding:14px 22px;margin:6px 14px;border-radius:10px;color:#e0e0e0;cursor:pointer;display:flex;gap:14px}
+.menu li:hover{background:rgba(255,255,255,.14)}
+.menu li.active{background:#fff;color:#16324f;font-weight:600}
+.menu li.logout{border-top:1px solid rgba(255,255,255,.15);margin-top:18px;color:#ffb4b4}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:240px;right:0;height:100px;background:#b87333;display:flex;align-items:center;justify-content:flex-end;padding:0 28px}
+.top-logo{position:absolute;left:50%;transform:translateX(-50%)}
+.top-logo img{height:70px}
+
+/* PROFILE */
+.profile{display:flex;align-items:center;gap:10px;cursor:pointer;position:relative}
+.profile img{width:38px;height:38px;border-radius:50%;border:2px solid #fff}
+.profile-name{color:#fff;font-weight:600;font-size:14px}
+
+.profile-menu{
+display:none;
+position:absolute;
+top:55px;
+right:0;
+width:260px;
+background:#fff;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,.2);
+padding:16px;
+}
+.profile-menu p{font-size:13px;margin-bottom:6px;color:#333}
+.profile-menu hr{margin:10px 0}
+.profile-menu button{
+width:100%;
+padding:8px;
+border:none;
+border-radius:6px;
+background:#c0392b;
+color:#fff;
+cursor:pointer
+}
+
+/* MAIN */
+.main-content{margin-left:240px;padding:120px 30px 30px}
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,280px));
+gap:26px;
+justify-content:center;
+}
+
+.card{
+background:#fff;
+padding:26px;
+border-radius:16px;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+cursor:pointer;
+transition:.2s;
+text-align:center;
+}
+.card:hover{transform:translateY(-4px)}
+.card i{font-size:28px;color:#1f4e79;margin-bottom:14px}
+.card h3{font-size:17px;margin-bottom:6px}
+.card p{font-size:13px;color:#555}
+
+/* IMAGE MODAL */
+.image-modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.75);
+z-index:9999;
+align-items:center;
+justify-content:center;
+}
+.image-modal img{
+width:260px;
+height:260px;
+border-radius:50%;
+object-fit:cover;
+border:6px solid #fff;
+}
+.image-modal .close{
+position:absolute;
+top:30px;
+right:40px;
+font-size:32px;
+color:#fff;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+<div class="brand-text">
+<h3>Alliance University</h3>
+<p>Faculty Portal</p>
+</div>
+
+<ul class="menu">
+<li class="active"><i class="fas fa-chart-pie"></i>Dashboard</li>
+<li onclick="navigate('facultystudents.html')"><i class="fas fa-user-graduate"></i>My Students</li>
+<li onclick="navigate('facultyreports.html')"><i class="fas fa-chart-line"></i>Reports</li>
+<li onclick="navigate('facultysurvey.html')"><i class="fas fa-poll"></i>Survey</li>
+<li onclick="navigate('facultyuploadmarks.html')"><i class="fas fa-upload"></i>Marks Upload</li>
+<li onclick="navigate('faculty-feedback.html')"><i class="fas fa-comments"></i>Feedback</li>
+<li onclick="navigate('facultyvideo.html')"><i class="fas fa-video"></i>Video</li>
+<li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i>Logout</li>
+</ul>
+</aside>
+
+<main class="main-content">
+
+<header class="topbar">
+<div class="top-logo">
+<img src="../images/AU.png">
+</div>
+
+<div class="profile" onclick="toggleProfile()">
+<img id="profileImg" src="../images/profile.png" onclick="openImage(event)">
+<span class="profile-name" id="facultyName">Faculty</span>
+<i class="fas fa-caret-down"></i>
+
+<div id="profileMenu" class="profile-menu">
+<p><strong>Name:</strong> <span id="pName">-</span></p>
+<p><strong>Email:</strong> <span id="pEmail">-</span></p>
+<p><strong>Phone:</strong> <span id="pPhone">-</span></p>
+<hr>
+<button onclick="logout()">Logout</button>
+</div>
+</div>
+</header>
+
+<section class="cards">
+
+<div class="card" onclick="navigate('facultystudents.html')">
+<i class="fas fa-user-graduate"></i>
+<h3>My Students</h3>
+<p>View assigned students</p>
+</div>
+
+<div class="card" onclick="navigate('facultyreports.html')">
+<i class="fas fa-chart-line"></i>
+<h3>Reports</h3>
+<p>Performance analysis</p>
+</div>
+
+<div class="card" onclick="navigate('facultysurvey.html')">
+<i class="fas fa-poll"></i>
+<h3>Survey</h3>
+<p>Student surveys</p>
+</div>
+
+<div class="card" onclick="navigate('facultyuploadmarks.html')">
+<i class="fas fa-upload"></i>
+<h3>Marks Upload</h3>
+<p>Internal assessments</p>
+</div>
+
+<div class="card" onclick="navigate('faculty-feedback.html')">
+<i class="fas fa-comments"></i>
+<h3>Feedback</h3>
+<p>Academic feedback</p>
+</div>
+
+<div class="card" onclick="navigate('facultyvideo.html')">
+<i class="fas fa-video"></i>
+<h3>Student Videos</h3>
+<p>Mock presentations</p>
+</div>
+
+<!-- ✅ FINAL REPORT CARD (NEW) -->
+<div class="card" onclick="navigate('facultyfinalreport.html')">
+<i class="fas fa-file-circle-check"></i>
+<h3>Final Report</h3>
+<p>Generate consolidated student report</p>
+</div>
+
+</section>
+</main>
+
+<div id="imgModal" class="image-modal" onclick="closeImage(event)">
+<span class="close">&times;</span>
+<img id="modalImg">
+</div>
+
+<script>
+function navigate(p){location.href="/faculty/"+p}
+function toggleProfile(){
+const m=document.getElementById("profileMenu");
+m.style.display=m.style.display==="block"?"none":"block";
+}
+function logout(){location.href="/faculty/logout"}
+
+function openImage(e){
+e.stopPropagation();
+modalImg.src=profileImg.src;
+imgModal.style.display="flex";
+}
+function closeImage(e){
+if(e.target.id==="imgModal"||e.target.className==="close"){
+imgModal.style.display="none";
+}
+}
+
+async function loadProfile(){
+try{
+const r=await fetch("/faculty/dashboard/profile",{credentials:"include"});
+if(!r.ok)return;
+const d=await r.json();
+facultyName.textContent=d.full_name;
+pName.textContent=d.full_name;
+pEmail.textContent=d.email;
+pPhone.textContent=d.phone||"-";
+profileImg.src=d.profile_image||"../images/profile.png";
+}catch{}
+}
+loadProfile();
+setInterval(loadProfile,5000);
+</script>
+
+</body>
+</html>

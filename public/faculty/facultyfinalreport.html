@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Final Performance Report | Faculty</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma}
+body{background:#f4f7fb}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;width:240px;height:100vh;background:linear-gradient(180deg,#1f4e79,#16324f,#0f2437)}
+.brand-text{padding:26px 20px;border-bottom:1px solid rgba(255,255,255,.15)}
+.brand-text h3{color:#fff;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px}
+.menu{list-style:none;padding:18px 0}
+.menu li{padding:14px 22px;margin:6px 14px;border-radius:10px;color:#e0e0e0;cursor:pointer;display:flex;gap:14px;align-items:center}
+.menu li:hover{background:rgba(255,255,255,.14)}
+.menu li.active{background:#fff;color:#16324f;font-weight:600}
+.menu li.logout{border-top:1px solid rgba(255,255,255,.15);margin-top:18px;color:#ffb4b4}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:240px;right:0;height:100px;background:#b87333;display:flex;align-items:center;justify-content:flex-end;padding:0 28px}
+.top-logo{position:absolute;left:50%;transform:translateX(-50%)}
+.top-logo img{height:70px}
+
+/* PROFILE */
+.profile{display:flex;align-items:center;gap:10px;cursor:pointer;position:relative}
+.profile img{width:38px;height:38px;border-radius:50%;border:2px solid #fff;cursor:pointer}
+.profile-name{color:#fff;font-weight:600;font-size:14px}
+
+.profile-menu{
+display:none;
+position:absolute;
+top:55px;
+right:0;
+width:260px;
+background:#fff;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,.2);
+padding:16px;
+}
+
+.profile-menu p{font-size:13px;margin-bottom:6px;color:#333}
+.profile-menu hr{margin:10px 0}
+
+.profile-menu button{
+width:100%;
+padding:8px;
+border:none;
+border-radius:6px;
+background:#c0392b;
+color:#fff;
+cursor:pointer
+}
+
+/* MAIN */
+.main-content{margin-left:240px;padding:120px 30px 30px}
+
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:26px
+}
+.header h2{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  color:#1f4e79
+}
+
+/* BUTTONS */
+.btn{
+  border:none;
+  padding:12px 26px;
+  border-radius:12px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  margin-left:10px
+}
+.btn.primary{background:#1f4e79;color:#fff}
+.btn.primary:hover{background:#16324f}
+.btn.secondary{
+  background:#e5e7eb;
+  color:#1f2937
+}
+.btn.secondary:hover{background:#d1d5db}
+
+/* CARD */
+.card{
+  background:#fff;
+  padding:28px;
+  border-radius:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  margin-bottom:30px
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:30px
+}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{
+  padding:14px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center
+}
+th{background:#f1f5f9}
+
+/* BADGES */
+.badge{
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  color:#fff
+}
+.badge.Excellent{background:#16a34a}
+.badge.Good{background:#2563eb}
+.badge.Average{background:#f59e0b}
+.badge.Poor{background:#dc2626}
+
+.small{font-size:12px;color:#64748b;margin-top:10px}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+<div class="brand-text">
+<h3>Alliance University</h3>
+<p>Faculty Portal</p>
+</div>
+
+<ul class="menu">
+<li onclick="navigate('faculty_dashboard.html')"><i class="fas fa-chart-pie"></i>Dashboard</li>
+<li onclick="navigate('facultystudents.html')"><i class="fas fa-user-graduate"></i>My Students</li>
+<li class="active" onclick="navigate('facultyreports.html')"><i class="fas fa-chart-line"></i>Reports</li>
+<li onclick="navigate('facultysurvey.html')"><i class="fas fa-poll"></i>Survey</li>
+<li onclick="navigate('facultyuploadmarks.html')"><i class="fas fa-upload"></i>Marks Upload</li>
+<li onclick="navigate('faculty-feedback.html')"><i class="fas fa-comments"></i>Feedback</li>
+<li onclick="navigate('facultyvideo.html')"><i class="fas fa-video"></i>Video</li>
+<li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i>Logout</li>
+</ul>
+</aside>
+
+<main class="main-content">
+
+<header class="topbar">
+<div class="top-logo">
+<img src="../images/AU.png">
+</div>
+
+<div class="profile" onclick="toggleProfile()">
+<img id="profileImg"
+     src="../images/profile.png"
+     onclick="openImage(event)">
+<span class="profile-name" id="facultyName">Faculty</span>
+<i class="fas fa-caret-down"></i>
+
+<div id="profileMenu" class="profile-menu">
+<p><strong>Name:</strong> <span id="pName">-</span></p>
+<p><strong>Email:</strong> <span id="pEmail">-</span></p>
+<p><strong>Phone:</strong> <span id="pPhone">-</span></p>
+<hr>
+<button onclick="logout()">Logout</button>
+</div>
+</div>
+</header>
+
+<div class="header">
+  <h2><i class="fas fa-layer-group"></i> Overall Student Performance</h2>
+  <div>
+    <button class="btn secondary" onclick="navigate('facultyreports.html')">
+      Back to Reports
+    </button>
+    <button class="btn secondary" onclick="navigate('faculty-feedback.html')">
+      Go to Feedback
+    </button>
+    <button class="btn primary" onclick="regenerateReport()">
+      Generate Final Report
+    </button>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- TABLE -->
+  <div class="card">
+    <div id="finalReport">Loading saved final report…</div>
+  </div>
+
+  <!-- CHART -->
+  <div class="card">
+    <canvas id="levelChart" height="260"></canvas>
+  </div>
+
+</div>
+
+</main>
+
+<!-- IMAGE MODAL -->
+<div id="imgModal" class="image-modal" onclick="closeImage(event)">
+<span class="close">&times;</span>
+<img id="modalImg">
+</div>
+
+<script>
+function navigate(p){location.href="/faculty/"+p}
+function toggleProfile(){
+const m=document.getElementById("profileMenu");
+m.style.display=m.style.display==="block"?"none":"block";
+}
+function logout(){location.href="/faculty/logout"}
+
+let chart;
+
+/* IMAGE ENLARGE */
+function openImage(e){
+e.stopPropagation();
+document.getElementById("modalImg").src=document.getElementById("profileImg").src;
+document.getElementById("imgModal").style.display="flex";
+}
+function closeImage(e){
+if(e.target.id==="imgModal"||e.target.className==="close"){
+document.getElementById("imgModal").style.display="none";
+}
+}
+
+/* LIVE AUTO REFRESH FACULTY DATA */
+async function loadProfile(){
+try{
+const res=await fetch("/faculty/dashboard/profile",{credentials:"include"});
+if(!res.ok) return;
+const d=await res.json();
+
+document.getElementById("facultyName").textContent=d.full_name;
+document.getElementById("pName").textContent=d.full_name;
+document.getElementById("pEmail").textContent=d.email;
+document.getElementById("pPhone").textContent=d.phone || "-";
+document.getElementById("profileImg").src=d.profile_image || "../images/profile.png";
+}catch(e){}
+}
+
+loadProfile();
+setInterval(loadProfile,5000);
+
+/* LOAD SAVED DATA */
+window.onload = loadSavedReport;
+
+async function loadSavedReport(){
+  try{
+    const r = await fetch("/faculty/reports/overall",{credentials:"include"});
+    if(!r.ok) throw 0;
+    const d = await r.json();
+    if(!d.length){
+      document.getElementById("finalReport").innerHTML =
+        "No final report generated yet.";
+      return;
+    }
+    renderTable(d);
+    renderChart(d);
+  }catch{
+    document.getElementById("finalReport").innerHTML =
+      "Failed to load final report.";
+  }
+}
+
+/* REGENERATE */
+async function regenerateReport(){
+  const box = document.getElementById("finalReport");
+  box.innerHTML = "Generating final report… Please wait.";
+
+  try {
+    // 1️⃣ CALL BACKEND GENERATE (WRITE)
+    const r = await fetch(
+      "/faculty/reports/overall/generate",
+      {
+        method: "POST",
+        credentials: "include"
+      }
+    );
+
+    if (!r.ok) {
+      box.innerHTML = "Failed to generate report.";
+      return;
+    }
+
+    // 2️⃣ LOAD GENERATED DATA (READ)
+    await loadSavedReport();
+
+  } catch (e) {
+    box.innerHTML = "Server error while generating report.";
+  }
+}
+
+
+/* TABLE */
+function renderTable(d){
+  document.getElementById("finalReport").innerHTML=`
+  <table>
+    <thead>
+      <tr>
+        <th>Student Name</th>
+        <th>Register No</th>
+        <th>Academic (%)</th>
+        <th>Survey (%)</th>
+        <th>Video (%)</th>
+        <th>Overall Level</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${d.map(s=>`
+        <tr>
+          <td>${s.student_name}</td>
+          <td>${s.register_number}</td>
+          <td>${(s.academic_confidence*100).toFixed(1)}</td>
+          <td>${(s.survey_confidence*100).toFixed(1)}</td>
+          <td>${(s.video_confidence*100).toFixed(1)}</td>
+          <td><span class="badge ${s.overall_level}">${s.overall_level}</span></td>
+        </tr>
+      `).join("")}
+    </tbody>
+  </table>
+  <div class="small">
+    Data persists until regenerated or deleted from backend.
+  </div>`;
+}
+
+/* CHART */
+function renderChart(d){
+  const counts={Excellent:0,Good:0,Average:0,Poor:0};
+  d.forEach(s=>counts[s.overall_level]++);
+  if(chart) chart.destroy();
+
+  chart=new Chart(document.getElementById("levelChart"),{
+    type:"doughnut",
+    data:{
+      labels:Object.keys(counts),
+      datasets:[{
+        data:Object.values(counts),
+        backgroundColor:["#16a34a","#2563eb","#f59e0b","#dc2626"]
+      }]
+    },
+    options:{
+      plugins:{
+        legend:{position:"bottom"},
+        title:{display:true,text:"Overall Performance Distribution"}
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>

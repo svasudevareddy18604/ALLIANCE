@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mentor Allocation | Alliance University</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="deandashboard.css">
+
+<style>
+
+/* ===============================
+   PAGE HEADINGS
+================================ */
+.page-header {
+  padding: 30px 40px 10px;
+}
+
+.page-header h2 {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.page-header p {
+  color: #666;
+  font-size: 14px;
+}
+
+/* ===============================
+   CARD FORM
+================================ */
+.form-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 25px;
+  max-width: 720px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+}
+
+.form-card h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-grid select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.form-grid select:focus {
+  outline: none;
+  border-color: #1680ae;
+}
+
+/* ===============================
+   PRIMARY BUTTON
+================================ */
+.primary-btn {
+  background: #1680ae;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.primary-btn i {
+  margin-right: 6px;
+}
+
+.primary-btn:hover {
+  background: #126892;
+}
+
+/* ===============================
+   TABLE
+================================ */
+.table-container {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+}
+
+.faculty-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.faculty-table th {
+  text-align: left;
+  padding: 12px;
+  background: #f3f6fa;
+  color: #333;
+}
+
+.faculty-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.faculty-table tr:hover {
+  background: #fafafa;
+}
+
+/* ===============================
+   ICON BUTTONS
+================================ */
+.icon-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 15px;
+  margin-right: 8px;
+  color: #1680ae;
+}
+
+.icon-btn.danger {
+  color: #922b21;
+}
+
+.icon-btn:hover {
+  transform: scale(1.1);
+}
+
+/* ===============================
+   SPACING HELPERS
+================================ */
+.section-padding {
+  padding: 0 40px 30px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Dean Office Portal</p>
+  </div>
+
+  <ul class="menu">
+    <li onclick="go('/dean/dashboard')"><i class="fas fa-chart-pie"></i><span>Dashboard</span></li>
+    <li onclick="go('/dean/deanfaculty.html')"><i class="fas fa-user-tie"></i><span>Faculty Management</span></li>
+    <li onclick="go('/dean/deanstudents.html')"><i class="fas fa-user-graduate"></i><span>Student Management</span></li>
+    <li class="active"><i class="fas fa-users"></i><span>Mentor Allocation</span></li>
+    <li onclick="go('/dean/deanreports.html')"><i class="fas fa-chart-line"></i><span>Reports & Analytics</span></li>
+    <li class="logout" onclick="go('/dean/logout')"><i class="fas fa-sign-out-alt"></i><span>Logout</span></li>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<main class="main-content">
+
+<header class="topbar">
+  <div class="top-logo">
+    <img src="../images/AU.png">
+  </div>
+</header>
+
+<!-- HEADER -->
+<section class="page-header">
+  <h2>Mentor Allocation</h2>
+  <p>Assign, change, or remove mentors for academic sections</p>
+</section>
+
+<!-- FORM -->
+<section class="section-padding">
+  <div class="form-card">
+    <h3>Assign / Change Mentor</h3>
+
+    <div class="form-grid">
+      <select id="courseSelect">
+        <option value="">Select Course</option>
+      </select>
+
+      <select id="sectionSelect">
+        <option value="">Select Section</option>
+      </select>
+
+      <select id="facultySelect" style="grid-column:1/3;">
+        <option value="">Select Faculty Mentor</option>
+      </select>
+    </div>
+
+    <div style="margin-top:20px;text-align:right;">
+      <button class="primary-btn" onclick="assignMentor()">
+        <i class="fas fa-check"></i> Assign Mentor
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- TABLE -->
+<section class="section-padding">
+  <div class="table-container">
+    <table class="faculty-table">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Section</th>
+          <th>Mentor</th>
+          <th>Email</th>
+          <th>Assigned On</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="mentorTable"></tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<script>
+function go(p){ location.href=p }
+
+/* LOAD FORM DATA */
+function loadFormData(){
+fetch("/dean/mentors/data")
+.then(r=>r.json())
+.then(data=>{
+  const courseSet=new Set();
+  courseSelect.innerHTML=`<option value="">Select Course</option>`;
+  facultySelect.innerHTML=`<option value="">Select Faculty Mentor</option>`;
+
+  data.students.forEach(s=>courseSet.add(s.course));
+  courseSet.forEach(c=>{
+    if(c) courseSelect.innerHTML+=`<option value="${c}">${c}</option>`;
+  });
+
+  data.faculty.forEach(f=>{
+    facultySelect.innerHTML+=`
+<option value="${f.id}">
+${f.full_name} (${f.department||"Faculty"})
+</option>`;
+  });
+});
+}
+
+/* LOAD SECTIONS */
+courseSelect.addEventListener("change",()=>{
+sectionSelect.innerHTML=`<option value="">Select Section</option>`;
+fetch(`/dean/mentors/sections?course=${courseSelect.value}`)
+.then(r=>r.json())
+.then(sections=>{
+  sections.forEach(s=>{
+    sectionSelect.innerHTML+=`<option value="${s}">${s}</option>`;
+  });
+});
+});
+
+/* ASSIGN */
+function assignMentor(){
+if(!courseSelect.value||!sectionSelect.value||!facultySelect.value) return;
+
+fetch("/dean/mentors",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({
+  course:courseSelect.value,
+  section:sectionSelect.value,
+  faculty_id:facultySelect.value
+})
+}).then(()=>loadMentorTable());
+}
+
+/* LOAD TABLE */
+function loadMentorTable(){
+fetch("/dean/mentors")
+.then(r=>r.json())
+.then(data=>{
+mentorTable.innerHTML="";
+data.forEach(m=>{
+mentorTable.innerHTML+=`
+<tr>
+<td>${m.course}</td>
+<td>${m.section}</td>
+<td>${m.full_name}</td>
+<td>${m.email}</td>
+<td>${new Date(m.assigned_at).toLocaleDateString()}</td>
+<td>
+<button class="icon-btn" onclick="prefill('${m.course}','${m.section}','${m.faculty_id}')">
+<i class="fas fa-edit"></i>
+</button>
+<button class="icon-btn danger" onclick="removeMentor('${m.course}','${m.section}')">
+<i class="fas fa-trash"></i>
+</button>
+</td>
+</tr>`;
+});
+});
+}
+
+/* PREFILL */
+function prefill(course,section,facultyId){
+courseSelect.value=course;
+
+fetch(`/dean/mentors/sections?course=${course}`)
+.then(r=>r.json())
+.then(sections=>{
+sectionSelect.innerHTML=`<option value="">Select Section</option>`;
+sections.forEach(s=>{
+sectionSelect.innerHTML+=`<option value="${s}">${s}</option>`;
+});
+sectionSelect.value=section;
+});
+
+facultySelect.value=facultyId;
+}
+
+/* REMOVE */
+function removeMentor(course,section){
+if(!confirm("Remove mentor from this section?")) return;
+
+fetch(`/dean/mentors`,{
+method:"DELETE",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({ course, section })
+}).then(()=>loadMentorTable());
+}
+
+/* INIT */
+loadFormData();
+loadMentorTable();
+</script>
+
+</body>
+</html>

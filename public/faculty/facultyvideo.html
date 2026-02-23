@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Video Submissions | Alliance University</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma}
+body{background:#f4f7fb}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;width:240px;height:100vh;background:linear-gradient(180deg,#1f4e79,#16324f,#0f2437)}
+.brand-text{padding:26px 20px;border-bottom:1px solid rgba(255,255,255,.15)}
+.brand-text h3{color:#fff;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px}
+.menu{list-style:none;padding:18px 0}
+.menu li{padding:14px 22px;margin:6px 14px;border-radius:10px;color:#e0e0e0;cursor:pointer;display:flex;gap:14px}
+.menu li:hover{background:rgba(255,255,255,.14)}
+.menu li.active{background:#fff;color:#16324f;font-weight:600}
+.menu li.logout{border-top:1px solid rgba(255,255,255,.15);margin-top:18px;color:#ffb4b4}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:240px;right:0;height:100px;background:#b87333;display:flex;align-items:center;justify-content:center}
+.topbar img{height:70px}
+
+/* MAIN */
+.main-content{margin-left:240px;padding:130px 30px 30px}
+.subtitle{color:#555;margin-bottom:22px}
+
+/* TABLE */
+.table-box{background:#fff;border-radius:16px;padding:20px;box-shadow:0 10px 25px rgba(0,0,0,.08)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:14px 12px;text-align:left}
+th{background:#f1f5f9;color:#16324f;font-weight:600}
+tr:nth-child(even){background:#f9fbfd}
+
+/* STATUS */
+.status{padding:6px 12px;border-radius:14px;font-size:12px;font-weight:600;display:inline-block}
+.DONE{background:#dcfce7;color:#166534}
+.PROCESSING{background:#fef3c7;color:#92400e}
+.NOT_SUBMITTED{background:#fee2e2;color:#991b1b}
+
+/* LOADING */
+.loading{text-align:center;padding:40px;color:#666}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+<div class="brand-text">
+<h3>Alliance University</h3>
+<p>Faculty Portal</p>
+</div>
+
+<ul class="menu">
+<li onclick="navigate('faculty_dashboard.html')"><i class="fas fa-chart-pie"></i>Dashboard</li>
+<li onclick="navigate('facultystudents.html')"><i class="fas fa-user-graduate"></i>My Students</li>
+<li onclick="navigate('facultyreports.html')"><i class="fas fa-chart-line"></i>Reports</li>
+<li onclick="navigate('facultysurvey.html')"><i class="fas fa-poll"></i>Survey</li>
+<li onclick="navigate('facultyuploadmarks.html')"><i class="fas fa-upload"></i>Marks Upload</li>
+<li onclick="navigate('faculty-feedback.html')"><i class="fas fa-comments"></i>Feedback</li>
+<li class="active"><i class="fas fa-video"></i>Student Videos</li>
+<li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i>Logout</li>
+</ul>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+<img src="../images/AU.png">
+</header>
+
+<!-- MAIN -->
+<main class="main-content">
+<h2>Student Video Submissions</h2>
+<p class="subtitle">Submission status of assigned students</p>
+
+<div class="table-box">
+<table>
+<thead>
+<tr>
+<th>S.no</th>
+<th>Student Name</th>
+<th>Register No</th>
+<th>Section</th>
+<th>Status</th>
+<th>Submitted On</th>
+</tr>
+</thead>
+<tbody id="videoTable">
+<tr><td colspan="6" class="loading">Loading data...</td></tr>
+</tbody>
+</table>
+</div>
+</main>
+
+<script>
+function navigate(p){location.href="/faculty/"+p}
+function logout(){location.href="/faculty/logout"}
+
+async function loadVideos(){
+    const tbody=document.getElementById("videoTable");
+    try{
+        const res=await fetch("/faculty/videos",{credentials:"include"});
+        if(!res.ok) throw new Error("API failed");
+
+        const data=await res.json();
+        tbody.innerHTML="";
+
+        if(!data.length){
+            tbody.innerHTML='<tr><td colspan="6" class="loading">No students found</td></tr>';
+            return;
+        }
+
+        data.forEach((s,i)=>{
+            const statusClass = s.status || "NOT_SUBMITTED";
+            tbody.innerHTML+=`
+            <tr>
+                <td>${i+1}</td>
+                <td>${s.name}</td>
+                <td>${s.register_no}</td>
+                <td>${s.section}</td>
+                <td><span class="status ${statusClass}">${statusClass.replace("_"," ")}</span></td>
+                <td>${s.created_at || "-"}</td>
+            </tr>`;
+        });
+
+    }catch(err){
+        tbody.innerHTML='<tr><td colspan="6" class="loading">Failed to load data</td></tr>';
+        console.error(err);
+    }
+}
+
+loadVideos();
+</script>
+
+</body>
+</html>

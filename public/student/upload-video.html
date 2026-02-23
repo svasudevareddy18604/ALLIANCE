@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Upload Video | Alliance University</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI"}
+body{background:#f6f8fb}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+    position:fixed;
+    top:0;left:0;
+    width:240px;height:100vh;
+    background:linear-gradient(180deg,#1680ae,#203a43,#2c5364);
+    padding:20px 0;
+}
+
+.brand{
+    text-align:center;
+    padding:10px 20px 30px;
+    border-bottom:1px solid rgba(255,255,255,.15);
+}
+.brand h3{color:#fff;font-size:18px}
+.brand p{color:#cfd8dc;font-size:13px;margin-top:4px}
+
+.menu{list-style:none;padding:20px 0}
+.menu li{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 22px;
+    margin:6px 14px;
+    border-radius:12px;
+    color:#e5e7eb;
+    cursor:pointer;
+    transition:.25s;
+    font-size:14.5px;
+}
+.menu li i{width:18px}
+.menu li:hover{background:rgba(255,255,255,.15)}
+.menu li.active{
+    background:#fff;
+    color:#203a43;
+    font-weight:600;
+}
+
+.logout-box{
+    position:absolute;
+    bottom:20px;
+    left:14px;
+    right:14px;
+}
+.logout{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 22px;
+    border-radius:12px;
+    background:rgba(255,255,255,.12);
+    color:#ffb4b4;
+    cursor:pointer;
+}
+.logout:hover{background:rgba(255,0,0,.25);color:#fff}
+
+/* ===== TOPBAR ===== */
+.topbar{
+    position:fixed;
+    left:240px;right:0;top:0;
+    height:90px;
+    background:#cd8648;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:5;
+}
+.topbar img{height:60px}
+
+/* ===== MAIN ===== */
+.main{
+    margin-left:240px;
+    padding:120px 40px 40px;
+}
+
+/* ===== UPLOAD ===== */
+.upload-box{
+    background:#fff;
+    border-radius:16px;
+    padding:28px;
+    max-width:860px;
+    box-shadow:0 10px 24px rgba(0,0,0,.06);
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+}
+
+.choose-btn{
+    background:#e6f0f6;
+    border:1px dashed #1680ae;
+    padding:12px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    color:#203a43;
+}
+.choose-btn:hover{background:#dbeaf2}
+
+.upload-btn{
+    background:#1680ae;
+    color:#fff;
+    border:none;
+    padding:12px 24px;
+    border-radius:10px;
+    cursor:pointer;
+}
+.upload-btn:hover{background:#0f6a91}
+
+.file-name{flex:1;color:#555;font-size:14px}
+
+/* ===== VIDEO LIST ===== */
+.video-card{
+    background:#fff;
+    margin-top:26px;
+    padding:22px;
+    border-radius:16px;
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+}
+.video-card video{
+    width:100%;
+    max-height:320px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.status{
+    padding:4px 10px;
+    border-radius:12px;
+    font-size:12px;
+    font-weight:600;
+}
+.UPLOADED{background:#e0f2fe;color:#0369a1}
+.PROCESSING{background:#fef3c7;color:#92400e}
+.DONE{background:#dcfce7;color:#166534}
+
+.delete-btn{
+    background:#dc2626;
+    color:#fff;
+    border:none;
+    padding:6px 14px;
+    border-radius:8px;
+    font-size:12px;
+    cursor:pointer;
+    margin-left:10px;
+}
+
+/* ===== ANALYSIS ===== */
+.analysis{
+    margin-top:14px;
+    background:#f8fafc;
+    border-radius:12px;
+    padding:16px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+    font-size:14px;
+}
+.analysis span{font-weight:600;color:#203a43}
+.confidence{
+    grid-column:1/3;
+    background:#1680ae;
+    color:#fff;
+    text-align:center;
+    padding:14px;
+    border-radius:12px;
+    font-size:18px;
+    font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="brand">
+        <h3>Alliance University</h3>
+        <p>Student Portal</p>
+    </div>
+
+    <ul class="menu">
+        <li onclick="go('studentdashboard.html')"><i class="fas fa-home"></i>Dashboard</li>
+        <li onclick="go('survey.html')"><i class="fas fa-poll"></i>Take Survey</li>
+        <li class="active"><i class="fas fa-video"></i>Upload Video</li>
+        <li onclick="go('studentacademicdata.html')"><i class="fas fa-graduation-cap"></i>Academic Results</li>
+        <li onclick="go('reports.html')"><i class="fas fa-chart-line"></i>Reports</li>
+        <li onclick="go('feedback.html')"><i class="fas fa-comments"></i>Feedback</li>
+        <li onclick="go('mentor.html')"><i class="fas fa-user-tie"></i>Mentor</li>
+    </ul>
+
+    <div class="logout-box">
+        <div class="logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </div>
+    </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+    <img src="../images/AU.png">
+</header>
+
+<!-- MAIN -->
+<main class="main">
+    <h2>Video Submission</h2>
+    <p>Upload mock interview videos for AI-based evaluation</p>
+
+    <div class="upload-box">
+        <input type="file" id="videoFile" accept="video/mp4" hidden>
+        <button class="choose-btn" onclick="videoFile.click()">
+            <i class="fas fa-folder-open"></i> Choose Video
+        </button>
+        <span class="file-name" id="fileName">No file selected</span>
+        <button class="upload-btn" onclick="uploadVideo()">
+            <i class="fas fa-cloud-upload-alt"></i> Upload
+        </button>
+    </div>
+
+    <div id="videoList"></div>
+</main>
+
+<script>
+function go(p){location.href="/student/"+p}
+function logout(){location.href="/student/logout"}
+
+videoFile.onchange=e=>{
+    fileName.textContent=e.target.files[0]?.name || "No file selected"
+}
+
+let pollTimer=null
+
+async function uploadVideo(){
+    if(!videoFile.files.length) return alert("Select a video")
+    const fd=new FormData()
+    fd.append("video",videoFile.files[0])
+    await fetch("/student/videos/upload",{method:"POST",body:fd,credentials:"include"})
+    videoFile.value=""
+    fileName.textContent="No file selected"
+    loadVideos(true)
+}
+
+async function deleteVideo(id){
+    if(!confirm("Delete this video?")) return
+    await fetch("/student/videos/"+id,{method:"DELETE",credentials:"include"})
+    loadVideos()
+}
+
+async function loadVideos(start=false){
+    const r=await fetch("/student/videos",{credentials:"include"})
+    const list=await r.json()
+    videoList.innerHTML=""
+    let processing=false
+
+    list.forEach(v=>{
+        if(v.status==="PROCESSING") processing=true
+        videoList.innerHTML+=`
+        <div class="video-card">
+            <video controls src="${v.video_url}"></video>
+            <p>
+                ${new Date(v.created_at).toLocaleString()}
+                • <span class="status ${v.status}">${v.status}</span>
+                ${v.status!=="PROCESSING"
+                    ? `<button class="delete-btn" onclick="deleteVideo(${v.id})">Delete</button>`
+                    : ""
+                }
+            </p>
+            ${v.status==="DONE" ? `
+            <div class="analysis">
+                <div>Eye Contact: <span>${Math.round(v.analysis.eye_contact_ratio*100)}%</span></div>
+                <div>Posture: <span>${v.analysis.posture}</span></div>
+                <div>Nervousness: <span>${v.analysis.nervousness}</span></div>
+                <div>Stress: <span>${v.analysis.stress}</span></div>
+                <div class="confidence">Confidence Score: ${v.analysis.confidence_score}%</div>
+            </div>`:""}
+        </div>`
+    })
+
+    if(processing){
+        if(!pollTimer) pollTimer=setInterval(loadVideos,5000)
+    }else{
+        clearInterval(pollTimer);pollTimer=null
+    }
+}
+loadVideos()
+</script>
+
+</body>
+</html>

@@ -1,0 +1,253 @@
+/* ================= GLOBAL ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    background: #f4f6f9;
+    height: 100vh;
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+    width: 290px;
+    background: #1c2b3a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sidebar text branding (NO LOGO) */
+.brand-text {
+    text-align: center;
+    padding: 32px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.brand-text h3 {
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+
+.brand-text p {
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+/* Menu */
+.menu {
+    list-style: none;
+    padding: 20px 0;
+}
+
+.menu li {
+    padding: 16px 26px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.menu li:hover,
+.menu li.active {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.menu li.logout {
+    margin-top: auto;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ================= MAIN CONTENT ================= */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ================= TOP BAR ================= */
+.topbar {
+    background: white;
+    padding: 18px 30px;
+    display: flex;
+    justify-content: center;
+    /* CENTER LOGO */
+    align-items: center;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Big centered logo */
+.top-logo img {
+    width: 300px;
+    max-width: 100%;
+}
+
+/* ================= PROFILE ================= */
+.profile {
+    position: absolute;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.profile img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+}
+
+.profile-menu {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: white;
+    padding: 15px;
+    width: 220px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    display: none;
+    font-size: 13px;
+    z-index: 10;
+}
+
+.profile-menu p {
+    margin-bottom: 8px;
+}
+
+.profile-menu hr {
+    margin: 10px 0;
+}
+
+.profile-menu button {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    background: #1c2b3a;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* ================= DASHBOARD CARDS ================= */
+.cards {
+    padding: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card i {
+    font-size: 30px;
+    color: #1c2b3a;
+    margin-bottom: 15px;
+}
+
+.card h3 {
+    margin-bottom: 8px;
+    color: #1c2b3a;
+}
+
+.card p {
+    font-size: 14px;
+    color: #555;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+}
+
+/*===========Faculty==========*/
+/* ===== BUTTONS ===== */
+.primary-btn {
+    background: #1c2b3a;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    margin-right: 6px;
+}
+
+.icon-btn.danger {
+    color: #b71c1c;
+}
+
+/* ===== TABLE ===== */
+.faculty-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.faculty-table th,
+.faculty-table td {
+    padding: 14px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.faculty-table th {
+    background: #f5f7fa;
+    font-size: 14px;
+}
+
+/* STATUS */
+.status.active {
+    color: green;
+    font-weight: 600;
+}
+
+/* ===== MODAL ===== */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    width: 400px;
+    border-radius: 6px;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

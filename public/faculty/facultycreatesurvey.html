@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Create Survey | Faculty Portal</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma}
+body{background:#f4f7fb}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+  position:fixed;left:0;top:0;width:240px;height:100vh;
+  background:linear-gradient(180deg,#1f4e79,#16324f,#0f2437)
+}
+.brand-text{padding:26px 20px;border-bottom:1px solid rgba(255,255,255,.15)}
+.brand-text h3{color:#fff;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px}
+.menu{list-style:none;padding:18px 0}
+.menu li{
+  padding:14px 22px;margin:6px 14px;border-radius:10px;
+  color:#e0e0e0;cursor:pointer;display:flex;gap:14px
+}
+.menu li:hover{background:rgba(255,255,255,.14)}
+.menu li.active{background:#fff;color:#16324f;font-weight:600}
+.menu li.logout{border-top:1px solid rgba(255,255,255,.15);margin-top:18px;color:#ffb4b4}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  position:fixed;top:0;left:240px;right:0;height:100px;
+  background:#b87333;display:flex;align-items:center;
+  justify-content:center;z-index:10
+}
+.top-logo img{height:70px}
+
+/* ===== MAIN ===== */
+.main-content{
+  margin-left:240px;
+  padding:120px 40px 40px;
+  max-width:1100px;
+}
+
+.card{
+  background:#fff;
+  padding:26px;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  margin-bottom:20px
+}
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border:1px solid #ccc;
+  border-radius:6px;
+  font-size:14px
+}
+
+button{
+  padding:10px 18px;
+  background:#1f4e79;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600
+}
+button:hover{background:#16324f}
+.remove-btn{background:#c0392b;margin-left:6px}
+
+.toast{
+  position:fixed;top:30px;right:30px;
+  background:#1f2d3d;color:#fff;
+  padding:14px 20px;border-radius:10px;
+  display:none
+}
+.toast.show{display:block}
+.toast.success{background:#2ecc71}
+.toast.error{background:#e74c3c}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+  <div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Faculty Portal</p>
+  </div>
+  <ul class="menu">
+    <li onclick="go('dashboard')">Dashboard</li>
+    <li onclick="go('facultystudents.html')">My Students</li>
+    <li class="active">Survey</li>
+    <li onclick="go('facultyreports.html')">Reports</li>
+    <li class="logout" onclick="logout()">Logout</li>
+  </ul>
+</aside>
+
+<main class="main-content">
+<header class="topbar">
+  <div class="top-logo"><img src="../images/AU.png"></div>
+</header>
+
+<div class="card">
+  <h2>Create Survey</h2>
+  <input id="surveyTitle" placeholder="Survey Title">
+</div>
+
+<div id="questions"></div>
+
+<div class="card">
+  <button onclick="addQuestion()">+ Add Question</button>
+  <button onclick="saveSurvey()" style="margin-left:10px">Save Survey</button>
+</div>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* =========================
+   ML FEATURE LIST (CONTRACT)
+========================= */
+const ML_FEATURES = [
+  { key:"Hours_Study_Per_Week", label:"Study Hours" },
+  { key:"Overall_Cgpa", label:"CGPA" },
+  { key:"Participation_Discussions", label:"Group Discussions" },
+  { key:"Use_Ai_Edtech_Tools_Like_Chatgpt_Coursera_Etc_Support_My_Learning", label:"AI Tool Usage" },
+  { key:"Feel_Stressed_Due_Academics", label:"Academic Stress" }
+];
+
+/* ========================= */
+let qCount = 0;
+function toast(m,t="error"){const x=document.getElementById("toast");x.textContent=m;x.className="toast show "+t;setTimeout(()=>x.className="toast",3000);}
+function go(p){location.href="/faculty/"+p}
+function logout(){location.href="/faculty/logout"}
+
+function addQuestion(){
+  qCount++;
+  const c=document.createElement("div");
+  c.className="card";
+  c.innerHTML=`
+    <h4>Question ${qCount}</h4>
+    <input class="q-text" placeholder="Question Text" oninput="autoSuggest(this)">
+    <select class="q-feature">
+      <option value="">-- Select ML Feature --</option>
+      ${ML_FEATURES.map(f=>`<option value="${f.key}">${f.label}</option>`).join("")}
+    </select>
+    <select class="q-type">
+      <option value="">-- Select Type --</option>
+      <option value="numeric">Numeric</option>
+      <option value="yesno">Yes / No</option>
+      <option value="likert">Likert</option>
+    </select>
+  `;
+  document.getElementById("questions").appendChild(c);
+}
+
+/* =========================
+   AUTO-SUGGEST FEATURE
+========================= */
+function autoSuggest(inp){
+  const text=inp.value.toLowerCase();
+  const sel=inp.parentElement.querySelector(".q-feature");
+  if(text.includes("hour")) sel.value="Hours_Study_Per_Week";
+  else if(text.includes("cgpa")) sel.value="Overall_Cgpa";
+  else if(text.includes("group")||text.includes("discussion")) sel.value="Participation_Discussions";
+  else if(text.includes("ai")) sel.value="Use_Ai_Edtech_Tools_Like_Chatgpt_Coursera_Etc_Support_My_Learning";
+  else if(text.includes("stress")) sel.value="Feel_Stressed_Due_Academics";
+}
+
+/* =========================
+   SAVE SURVEY
+========================= */
+function saveSurvey(){
+  const title=document.getElementById("surveyTitle").value.trim();
+  if(!title) return toast("Survey title required");
+
+  const questions=[];
+  document.querySelectorAll("#questions .card").forEach(c=>{
+    const text=c.querySelector(".q-text").value.trim();
+    const feature=c.querySelector(".q-feature").value;
+    const type=c.querySelector(".q-type").value;
+    if(!text||!feature||!type) throw toast("All fields required");
+    questions.push({ text, feature, type });
+  });
+
+  fetch("/faculty/surveys/create",{
+    method:"POST",
+    credentials:"include",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ title, questions })
+  })
+  .then(r=>r.ok?toast("Survey saved","success"):toast("Save failed"))
+  .then(()=>setTimeout(()=>location.href="/faculty/facultysurvey.html",1500));
+}
+</script>
+
+</body>
+</html>

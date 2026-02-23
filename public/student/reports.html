@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Reports | Alliance University</title>
+<link rel="icon" type="image/png" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../dean/deandashboard.css">
+<style>
+* { box-sizing: border-box; font-family: "Segoe UI", sans-serif; }
+.sidebar { position: fixed; left: 0; top: 0; width: 240px; height: 100vh; background: linear-gradient(180deg, #1680ae, #203a43, #2c5364); z-index: 100; }
+.sidebar .brand-text { padding: 20px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar .brand-text h3 { margin: 0 0 5px 0; font-size: 18px; }
+.sidebar .brand-text p { margin: 0; font-size: 12px; opacity: 0.8; }
+.sidebar .menu { list-style: none; padding: 20px 0; margin: 0; }
+.sidebar .menu li { padding: 12px 20px; color: rgba(255,255,255,0.8); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+.sidebar .menu li:hover, .sidebar .menu li.active { background: rgba(255,255,255,0.1); color: #fff; }
+.topbar { position: fixed; top: 0; left: 240px; right: 0; height: 110px; background: #cd8648; display: flex; align-items: center; justify-content: center; z-index: 200; }
+.main-content { margin-left: 240px; padding-top: 150px; background: #f6f8fb; min-height: 100vh; }
+.container { max-width: 1100px; margin: auto; padding: 24px; }
+.card { background: #fff; padding: 30px; border-radius: 16px; box-shadow: 0 10px 28px rgba(0,0,0,.08); margin-bottom: 40px; text-align: center; }
+.section-title { font-size: 20px; font-weight: 700; margin-bottom: 25px; display: flex; gap: 10px; color: #1f2937; align-items: center; justify-content: center; }
+.subject-header { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px 22px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
+.subject-title { font-size: 15px; font-weight: 700; color: #111827; }
+.subject-meta { font-size: 13px; color: #475569; }
+.table-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-bottom: 36px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: #f1f5f9; padding: 14px; font-weight: 700; text-align: left; }
+td { padding: 14px; border-top: 1px solid #e5e7eb; }
+.badge { padding: 6px 16px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff !important; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; background-color: #16a34a; }
+.Excellent { background: #16a34a; } .Good { background: #2563eb; } .Moderate { background: #f59e0b; } .Low { background: #dc2626; } .HIGH_CONFIDENCE { background: #16a34a; } .MODERATE_CONFIDENCE { background: #f59e0b; } .LOW_CONFIDENCE { background: #dc2626; } .At_Risk { background: #f59e0b; } .High_Confidence { background: #16a34a; } .Low_Risk { background: #16a34a; } .Medium_Risk { background: #f59e0b; } .High_Risk { background: #dc2626; }
+.video-card { background: #fff; border-radius: 16px; box-shadow: 0 10px 28px rgba(0,0,0,.08); padding: 24px; border: 1px solid #e5e7eb; position: relative; }
+.video-icon { position: absolute; top: 20px; left: 20px; background: #000; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
+.video-title { font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 20px; padding-left: 60px; }
+.video-metric { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+.video-label { color: #374151; font-weight: 500; }
+.video-value { color: #1f2937; font-weight: 600; text-align: right; }
+.video-badge { background: #16a34a; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.video-date { font-size: 12px; color: #6b7280; text-align: right; margin-top: 16px; padding-right: 4px; }
+.analysis-box { display: flex; justify-content: space-between; align-items: flex-start; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; gap: 20px; flex-wrap: wrap; }
+.analysis-details { display: flex; flex-direction: column; gap: 12px; font-size: 14px; color: #374151; flex: 1; min-width: 300px; }
+.analysis-detail-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+.analysis-detail-label { font-weight: 600; color: #1f2937; min-width: 140px; }
+.analysis-meta { font-size: 13px; color: #6b7280; white-space: nowrap; align-self: flex-end; }
+.missing { color: #b45309; font-weight: 600; }
+.placeholder { color: #6b7280; font-style: italic; }
+.view-report-btn:hover { background: #14a9db; }
+.view-report-btn i {
+  font-size: 13px;        /* smaller than text */
+  margin-right: 8px;     /* controlled spacing */
+  vertical-align: middle;
+}
+.view-report-btn {
+  background: #11cfcb;
+  color: #ffffff;
+  padding: 10px 22px;     /* FIXED */
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;        /* text slightly larger than icon */
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;  /* IMPORTANT */
+  align-items: center;   /* vertical centering */
+  justify-content: center;
+  gap: 6px;              /* consistent spacing */
+}
+
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand-text"><h3>Alliance University</h3><p>Student Portal</p></div>
+  <ul class="menu">
+    <li onclick="go('studentdashboard.html')"><i class="fas fa-home"></i> Dashboard</li>
+    <li onclick="go('survey.html')"><i class="fas fa-poll"></i> Survey</li>
+    <li onclick="go('upload-video.html')"><i class="fas fa-video"></i> Upload Video</li>
+    <li onclick="go('studentacademicdata.html')"><i class="fas fa-graduation-cap"></i> Academics</li>
+    <li class="active"><i class="fas fa-chart-line"></i> Reports</li>
+    <li onclick="go('mentor.html')"><i class="fas fa-user-tie"></i> Mentor</li>
+    <li onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</li>
+  </ul>
+</aside>
+<header class="topbar"><img src="../images/AU.png" height="70"></header>
+<main class="main-content">
+  <div class="container">
+    <div class="card">
+      <div class="section-title"><i class="fas fa-book"></i>Academic Performance Prediction</div>
+      <div id="academicReport">Loading academic report…</div>
+    </div>
+    <div class="card">
+      <div class="section-title"><i class="fas fa-poll"></i>Survey Analysis</div>
+      <div id="surveyReport" class="placeholder">Loading survey evaluation…</div>
+    </div>
+    <div class="card">
+      <div class="section-title"><i class="fas fa-video"></i>Video Analysis Report</div>
+      <div id="videoReport" class="placeholder">Loading video analysis…</div>
+    </div>
+    <div class="card">
+      <div class="section-title"><i class="fas fa-file-alt"></i>Full Report</div>
+      <button class="view-report-btn" onclick="go('studentviewfullreport.html')">
+        <i class=></i> View Full Report
+      </button>
+    </div>
+  </div>
+</main>
+<script>
+function go(p){ location.href="/student/"+p }
+function logout(){ location.href="/student/logout" }
+
+// ---------- GENERIC FETCH WITH TIMEOUT ----------
+async function fetchWithTimeout(url, options = {}, timeout = 5000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const res = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+
+    clearTimeout(id);
+
+    if (!res.ok) throw new Error("Server error");
+    return await res.json();
+  } catch (err) {
+    clearTimeout(id);
+    console.error("Fetch error:", err);
+    return null;
+  }
+}
+
+// ---------- LOAD ALL REPORTS IN PARALLEL ----------
+async function loadAllReports() {
+
+  const academicBox = document.getElementById("academicReport");
+  const surveyBox = document.getElementById("surveyReport");
+  const videoBox = document.getElementById("videoReport");
+
+  academicBox.innerHTML = "Loading...";
+  surveyBox.innerHTML = "Loading...";
+  videoBox.innerHTML = "Loading...";
+
+  try {
+
+    const [academicData, surveyData, videoData] = await Promise.all([
+      fetchWithTimeout("/student/reports/academic", { credentials:"include" }),
+      fetchWithTimeout("/student/reports/survey", { credentials:"include" }),
+      fetchWithTimeout("/student/reports/video", { credentials:"include" })
+    ]);
+
+    renderAcademic(academicData, academicBox);
+    renderSurvey(surveyData, surveyBox);
+    renderVideo(videoData, videoBox);
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ---------- RENDER FUNCTIONS ----------
+
+function renderAcademic(data, box) {
+
+  if (!Array.isArray(data) || !data.length) {
+    box.innerHTML = "No academic records available.";
+    return;
+  }
+
+  box.innerHTML = data.map(d => {
+
+    return `
+      <div class="subject-header">
+        <div class="subject-title">${d.subject_code} – ${d.subject_name}</div>
+        <div class="subject-meta">Semester ${d.semester} | ${d.exam_phase}</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Marks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>MSE</td><td>${d.mse ?? '-'}</td></tr>
+            <tr><td>Assignment</td><td>${d.assignment ?? '-'}</td></tr>
+            <tr><td>Class Test</td><td>${d.class_test ?? '-'}</td></tr>
+            <tr><td>Microproject</td><td>${d.microproject ?? '-'}</td></tr>
+            <tr><td>Presentation</td><td>${d.presentation ?? '-'}</td></tr>
+            <tr>
+              <td><strong>Prediction</strong></td>
+              <td>
+                <span class="badge ${d.prediction || 'Moderate'}">
+                  ${d.prediction || 'N/A'}
+                </span>
+                <div style="font-size:12px;margin-top:4px">
+                  Confidence: ${d.confidence ? (d.confidence * 100).toFixed(1) + '%' : 'N/A'}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderSurvey(d, box) {
+
+  if (!d || !d.risk_level) {
+    box.innerHTML = "No survey evaluation available.";
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="analysis-box">
+      <div class="analysis-details">
+        <div class="analysis-detail-row">
+          <span class="analysis-detail-label">Risk Level:</span>
+          <span class="badge ${d.risk_level}">
+            ${d.risk_level.replace(/_/g,' ')}
+          </span>
+        </div>
+        <div class="analysis-detail-row">
+          Evaluated on ${new Date(d.evaluated_at).toLocaleDateString()}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderVideo(data, box) {
+
+  if (!Array.isArray(data) || !data.length) {
+    box.innerHTML = "No video analysis available.";
+    return;
+  }
+
+  const latest = data[data.length - 1];
+
+  box.innerHTML = `
+    <div class="video-card">
+      <div class="video-icon">▶</div>
+      <div class="video-title">Video Analysis Report</div>
+
+      <div class="video-metric">
+        <span>Confidence:</span>
+        <span class="video-badge">${latest.confidence_score}%</span>
+      </div>
+
+      <div class="video-metric">
+        <span>Posture:</span>
+        <span>${latest.posture || 'N/A'}</span>
+      </div>
+
+      <div class="video-metric">
+        <span>Nervousness:</span>
+        <span>${latest.nervousness || 'N/A'}</span>
+      </div>
+
+      <div class="video-date">
+        ${new Date(latest.created_at).toLocaleDateString()}
+      </div>
+    </div>
+  `;
+}
+
+// INIT
+loadAllReports();
+</script>
+
+</body>
+</html>

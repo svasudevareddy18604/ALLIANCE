@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Faculty Discussion | Alliance University</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../dean/deandashboard.css">
+
+<style>
+/* ================= LAYOUT ================= */
+.sidebar{
+    position:fixed; left:0; top:0;
+    width:240px; height:100vh;
+    background:linear-gradient(180deg,#1680ae,#203a43,#2c5364);
+}
+
+.topbar{
+    position:fixed; top:0; left:240px; right:0;
+    height:90px;
+    background:#cd8648;
+    z-index:10;
+}
+
+.main-content{
+    margin-left:240px;
+    padding:120px 30px 30px;
+    background:#f4f6f9;
+    min-height:100vh;
+}
+
+/* ================= CHAT WRAPPER ================= */
+.chat-wrapper{
+    max-width:1200px;
+    margin:10 auto;   /* centers horizontally */
+}
+
+
+.chat-container{
+    background:#fff;
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.12);
+    display:flex;
+    flex-direction:column;
+    height:75vh;
+}
+
+/* ================= HEADER ================= */
+.chat-header{
+    padding:18px 26px;
+    border-bottom:1px solid #e3e7ee;
+    font-size:20px;
+    font-weight:600;
+    color:#203a43;
+    background:#fafbfc;
+    border-radius:14px 14px 0 0;
+}
+
+/* ================= BODY ================= */
+.chat-body{
+    flex:1;
+    padding:24px;
+    overflow-y:auto;
+    background:#f6f8fb;
+}
+
+/* ================= MESSAGE ================= */
+.message{
+    max-width:62%;
+    padding:14px 16px;
+    margin-bottom:18px;
+    border-radius:10px;
+    font-size:14.5px;
+    line-height:1.7;
+}
+
+.message.faculty{
+    background:#fff4e8;
+    border-left:5px solid #cd8648;
+}
+
+.message.student{
+    background:#eef4f7;
+    border-left:5px solid #203a43;
+    margin-left:auto;
+}
+
+/* ================= META ================= */
+.message-meta{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    color:#555;
+    margin-bottom:6px;
+}
+
+/* ================= INPUT ================= */
+.chat-input{
+    padding:18px 22px;
+    border-top:1px solid #e3e7ee;
+    background:#ffffff;
+}
+
+.chat-input textarea{
+    width:100%;
+    min-height:70px;
+    resize:none;
+    padding:12px 14px;
+    font-size:14.5px;
+    border-radius:8px;
+    border:1px solid #cfd6e0;
+    outline:none;
+}
+
+.chat-input textarea:focus{
+    border-color:#203a43;
+}
+
+.chat-input button{
+    margin-top:12px;
+    padding:10px 26px;
+    font-size:14.5px;
+    border:none;
+    border-radius:8px;
+    background:#203a43;
+    color:#fff;
+    cursor:pointer;
+}
+
+.chat-input button:hover{
+    background:#182f36;
+}
+
+/* ================= EMPTY / ERROR ================= */
+.empty{
+    text-align:center;
+    color:#777;
+    margin-top:40px;
+    font-size:14.5px;
+}
+.error{
+    text-align:center;
+    color:#b00020;
+    font-weight:600;
+    margin-top:40px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<aside class="sidebar">
+<div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Student Portal</p>
+</div>
+
+<ul class="menu">
+<li onclick="navigate('studentdashboard.html')"><i class="fas fa-home"></i><span>Dashboard</span></li>
+<li onclick="navigate('survey.html')"><i class="fas fa-poll"></i><span>Take Survey</span></li>
+<li onclick="navigate('upload-video.html')"><i class="fas fa-video"></i><span>Upload Video</span></li>
+<li onclick="navigate('studentacademicdata.html')"><i class="fas fa-graduation-cap"></i><span>Academic Results</span></li>
+<li onclick="navigate('reports.html')"><i class="fas fa-chart-line"></i><span>Reports</span></li>
+<li class="active"><i class="fas fa-comments"></i><span>Feedback</span></li>
+<li onclick="navigate('mentor.html')"><i class="fas fa-user-tie"></i><span>Mentor</span></li>
+<li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></li>
+</ul>
+</aside>
+
+<main class="main-content">
+
+<header class="topbar">
+<div class="top-logo">
+    <img src="../images/AU.png">
+</div>
+</header>
+
+<div class="chat-wrapper">
+<section class="chat-container">
+    <div class="chat-header">Discussion with Faculty</div>
+    <div id="chatBody" class="chat-body"></div>
+
+    <div class="chat-input">
+        <textarea id="msgInput" placeholder="Type your message clearly and professionally..."></textarea>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</section>
+</div>
+
+</main>
+
+<script>
+function navigate(p){ location.href="/student/"+p }
+function logout(){ location.href="/student/logout" }
+
+const FEEDBACK_ID = new URLSearchParams(location.search).get("id");
+const chatBody = document.getElementById("chatBody");
+
+if(!FEEDBACK_ID){
+    chatBody.innerHTML = `<div class="error">Invalid discussion session</div>`;
+    throw new Error("Missing feedback ID");
+}
+
+async function loadChat(){
+    const res = await fetch(`/student/chat/${FEEDBACK_ID}`,{ credentials:"include" });
+    if(!res.ok){
+        chatBody.innerHTML = `<div class="error">Unable to load discussion</div>`;
+        return;
+    }
+
+    const data = await res.json();
+    chatBody.innerHTML = "";
+
+    if(!data.messages || data.messages.length===0){
+        chatBody.innerHTML = `<div class="empty">No messages yet</div>`;
+        return;
+    }
+
+    data.messages.forEach(m=>{
+        const div=document.createElement("div");
+        div.className=`message ${m.sender}`;
+        div.innerHTML=`
+            <div class="message-meta">
+                <span>${m.sender==="faculty"?"Faculty":"You"}</span>
+                <span>${new Date(m.created_at).toLocaleString()}</span>
+            </div>
+            ${m.message}
+        `;
+        chatBody.appendChild(div);
+    });
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+async function sendMessage(){
+    const msg = msgInput.value.trim();
+    if(!msg) return;
+
+    const res = await fetch(`/student/chat/${FEEDBACK_ID}`,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        credentials:"include",
+        body:JSON.stringify({ message:msg })
+    });
+
+    if(!res.ok){
+        alert("Message not sent");
+        return;
+    }
+
+    msgInput.value="";
+    loadChat();
+}
+
+loadChat();
+</script>
+
+</body>
+</html>

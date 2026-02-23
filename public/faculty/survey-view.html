@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Survey Details | Faculty Portal</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma}
+body{background:#f4f7fb}
+
+.sidebar{
+  position:fixed;left:0;top:0;
+  width:240px;height:100vh;
+  background:linear-gradient(180deg,#1f4e79,#16324f,#0f2437)
+}
+.brand-text{padding:26px 20px;border-bottom:1px solid rgba(255,255,255,.15)}
+.brand-text h3{color:#fff;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px}
+.menu{list-style:none;padding:18px 0}
+.menu li{
+  padding:14px 22px;margin:6px 14px;
+  border-radius:10px;color:#e0e0e0;
+  cursor:pointer;display:flex;gap:14px
+}
+.menu li:hover{background:rgba(255,255,255,.14)}
+.menu li.active{background:#fff;color:#16324f;font-weight:600}
+.menu li.logout{border-top:1px solid rgba(255,255,255,.15);margin-top:18px;color:#ffb4b4}
+
+.topbar{
+  position:fixed;top:0;left:240px;right:0;
+  height:100px;background:#b87333;
+  display:flex;align-items:center;justify-content:center;
+  z-index:10
+}
+.top-logo img{height:70px}
+
+.main-content{
+  margin-left:240px;
+  padding:120px 40px 40px
+}
+
+.card{
+  background:#fff;
+  padding:26px;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  margin-top:26px
+}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:center}
+th{background:#f1f5f9}
+
+tr.clickable-row{cursor:pointer}
+tr.clickable-row:hover{background:#f0f6ff}
+
+.status-badge{
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  display:inline-block
+}
+.DRAFT{background:#fff3cd;color:#856404}
+.ACTIVE{background:#e6fffa;color:#065f46}
+.PUBLISHED{background:#fdecea;color:#7f1d1d}
+
+.btn{
+  padding:6px 14px;border:none;border-radius:6px;
+  cursor:pointer;font-size:13px;margin-right:6px
+}
+.btn-primary{background:#1f4e79;color:#fff}
+.btn-eval{background:#2563eb;color:#fff}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-disabled{background:#9ca3af;color:#fff;cursor:not-allowed}
+
+.toast{
+  position:fixed;bottom:30px;right:30px;
+  background:#1f2d3d;color:#fff;
+  padding:12px 18px;border-radius:8px;
+  display:none
+}
+.toast.show{display:block}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+  <div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Faculty Portal</p>
+  </div>
+  <ul class="menu">
+    <li onclick="go('dashboard')"><i class="fas fa-chart-pie"></i>Dashboard</li>
+    <li onclick="go('facultystudents.html')"><i class="fas fa-user-graduate"></i>My Students</li>
+    <li class="active"><i class="fas fa-poll"></i>Survey</li>
+    <li onclick="go('facultyreports.html')"><i class="fas fa-chart-line"></i>Reports</li>
+    <li onclick="go('facultyuploadmarks.html')"><i class="fas fa-upload"></i>Marks Upload</li>
+    <li onclick="go('faculty-feedback.html')"><i class="fas fa-comments"></i>Feedback</li>
+    <li onclick="go('facultyvideo.html')"><i class="fas fa-video"></i>Video</li>
+    <li class="logout" onclick="go('logout')"><i class="fas fa-sign-out-alt"></i>Logout</li>
+  </ul>
+</aside>
+
+<main class="main-content">
+<header class="topbar"><div class="top-logo"><img src="../images/AU.png"></div></header>
+
+<h2 id="surveyTitle">Loading…</h2>
+<p>Survey details & responses</p>
+
+<div class="card">
+  <strong>Status:</strong>
+  <span id="surveyStatus" class="status-badge"></span>
+  <div style="margin-top:15px">
+    <button class="btn btn-primary" onclick="updateStatus('DRAFT')">Draft</button>
+    <button class="btn btn-primary" onclick="updateStatus('ACTIVE')">Active</button>
+    <button class="btn btn-primary" onclick="updateStatus('PUBLISHED')">Publish</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Questions</h3>
+  <table>
+    <thead><tr><th>#</th><th>Question</th><th>Type</th></tr></thead>
+    <tbody id="questionList"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3>
+    Answered Students
+    <button class="btn btn-eval" style="float:right" onclick="evaluateAll()">Evaluate All</button>
+  </h3>
+  <table>
+    <thead><tr><th>#</th><th>Name</th><th>Section</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody id="answeredList"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Not Answered Students</h3>
+  <table>
+    <thead><tr><th>#</th><th>Name</th><th>Section</th></tr></thead>
+    <tbody id="notAnsweredList"></tbody>
+  </table>
+</div>
+
+<div id="toast" class="toast"></div>
+</main>
+
+<script>
+const surveyId = new URLSearchParams(location.search).get("survey_id");
+if(!surveyId) location.href="/faculty/facultysurvey.html";
+
+function go(p){ location.href="/faculty/"+p }
+
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.innerText=msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+
+function isEvaluated(s){
+  return String(s).toUpperCase()==="EVALUATED";
+}
+
+function goToStudentAnswers(studentId){
+  location.href = `/faculty/student-answers.html?survey_id=${surveyId}&student_id=${studentId}`;
+}
+
+async function loadSurvey(){
+  const res = await fetch(`/faculty/surveys/${surveyId}`,{credentials:"include"});
+  const d = await res.json();
+
+  surveyTitle.innerText = d.survey.title;
+  surveyStatus.innerText = d.survey.status;
+  surveyStatus.className = "status-badge " + d.survey.status;
+
+  questionList.innerHTML = d.questions.length
+    ? d.questions.map((q,i)=>`
+      <tr><td>${i+1}</td><td>${q.question_text}</td><td>${q.question_type}</td></tr>
+    `).join("")
+    : `<tr><td colspan="3">No questions</td></tr>`;
+
+  answeredList.innerHTML = d.answered.length
+    ? d.answered.map((s,i)=>{
+      const ev = isEvaluated(s.evaluation_status);
+      return `
+        <tr class="clickable-row" onclick="goToStudentAnswers(${s.student_id})">
+          <td>${i+1}</td>
+          <td>${s.name}</td>
+          <td>${s.section}</td>
+          <td>
+            <span class="status-badge ${ev?"ACTIVE":"DRAFT"}">
+              ${ev?"EVALUATED":"NOT EVALUATED"}
+            </span>
+          </td>
+          <td>
+            ${
+              ev
+              ? `<button class="btn btn-disabled">Evaluated</button>`
+              : `<button class="btn btn-eval" onclick="event.stopPropagation();evaluateOne(${s.student_id})">Evaluate</button>`
+            }
+          </td>
+        </tr>`;
+    }).join("")
+    : `<tr><td colspan="5">No responses</td></tr>`;
+
+  notAnsweredList.innerHTML = d.notAnswered.length
+    ? d.notAnswered.map((s,i)=>`
+      <tr><td>${i+1}</td><td>${s.name}</td><td>${s.section}</td></tr>
+    `).join("")
+    : `<tr><td colspan="3">All students responded</td></tr>`;
+}
+
+async function evaluateOne(studentId){
+  if(!confirm("Evaluate this student?")) return;
+  const res = await fetch(`/faculty/evaluate-survey/${studentId}?surveyId=${surveyId}`,
+    {method:"POST",credentials:"include"});
+  if(!res.ok){ toast("Evaluation failed"); return; }
+  toast("Student evaluated");
+  loadSurvey();
+}
+
+async function evaluateAll(){
+  if(!confirm("Evaluate ALL students?")) return;
+  const res = await fetch(`/faculty/evaluate-survey-all/${surveyId}`,
+    {method:"POST",credentials:"include"});
+  if(!res.ok){ toast("Bulk evaluation failed"); return; }
+  toast("All students evaluated");
+  loadSurvey();
+}
+
+async function updateStatus(status){
+  const res = await fetch(`/faculty/surveys/${surveyId}/status`,{
+    method:"PATCH",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({status}),
+    credentials:"include"
+  });
+  if(!res.ok){ toast("Status update failed"); return; }
+  loadSurvey();
+}
+
+loadSurvey();
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dean Login | Alliance University</title>
+    <link rel="stylesheet" href="dean_login.css">
+</head>
+
+<body>
+
+    <!-- BACKGROUND OVERLAY -->
+    <div class="overlay"></div>
+
+    <!-- LOGIN CONTAINER -->
+    <div class="login-wrapper">
+        <div class="login-box">
+
+            <img src="../images/AU.png" class="logo" alt="Alliance University">
+
+            <h1>Dean Office Login</h1>
+            <p class="tagline">Academic Administration Portal</p>
+
+            <!-- ❌ NO FORM SUBMIT -->
+            <div class="login-form">
+                <input type="text" id="username" placeholder="Dean Username">
+                <input type="password" id="password" placeholder="Password">
+
+                <div id="errorMsg" class="error-message"></div>
+
+                <!-- ✅ PURE BUTTON -->
+                <button id="loginBtn">Sign In</button>
+            </div>
+
+            <p class="note">Authorized access only</p>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        console.log("Dean login JS loaded");
+
+        const btn = document.getElementById("loginBtn");
+        const errorMsg = document.getElementById("errorMsg");
+
+        btn.addEventListener("click", async () => {
+            errorMsg.style.display = "none";
+
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!username || !password) {
+                showError("Username and password are required.");
+                return;
+            }
+
+            try {
+                const res = await fetch("/dean/login", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    window.location.href = "/dean/dashboard";
+                } else {
+                    showError(data.error || "Invalid login credentials.");
+                }
+
+            } catch (err) {
+                showError("Server not reachable.");
+                console.error(err);
+            }
+        });
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.style.display = "block";
+        }
+    </script>
+
+</body>
+
+</html>

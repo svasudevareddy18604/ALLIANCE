@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Faculty Login | Alliance University</title>
+    <link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+    
+    <link rel="stylesheet" href="../dean/dean_login.css">
+</head>
+
+<body>
+
+    <div class="overlay"></div>
+
+    <div class="login-wrapper">
+        <div class="login-box">
+
+            <img src="../images/AU.png" class="logo">
+
+            <h1>Faculty Login</h1>
+            <p class="tagline">Alliance University Faculty Portal</p>
+
+            <form id="facultyLoginForm" novalidate>
+                <input type="text" id="faculty_id" placeholder="Faculty ID (FAC001)" required>
+                <input type="password" id="password" placeholder="Password" required>
+
+                <div id="errorMsg" class="error-message"></div>
+
+                <button type="submit">Login</button>
+            </form>
+
+            <!-- 🔐 FORGOT PASSWORD -->
+            <p class="note" style="margin-top:18px;">
+                Forgot your password?
+                <a href="/faculty/change_password" class="forgot-link">
+                    click here
+                </a>
+                to reset your password.
+            </p>
+
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("facultyLoginForm");
+        const errorMsg = document.getElementById("errorMsg");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = "none";
+
+            const facultyId = document.getElementById("faculty_id").value.trim();
+            const password = document.getElementById("password").value;
+
+            if (!facultyId || !password) {
+                errorMsg.textContent = "Faculty ID and password are required.";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            try {
+                const res = await fetch("/faculty/login", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ faculty_id: facultyId, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorMsg.textContent = data.error || "Invalid login credentials.";
+                    errorMsg.style.display = "block";
+                    return;
+                }
+
+                // ✅ Always dashboard
+                window.location.href = "/faculty/dashboard";
+
+            } catch (err) {
+                errorMsg.textContent = "Server error. Please try again.";
+                errorMsg.style.display = "block";
+                console.error(err);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

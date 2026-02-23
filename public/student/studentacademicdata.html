@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Academic Results | Alliance University</title>
+
+<link rel="icon" type="image/png" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../dean/deandashboard.css">
+
+<style>
+body{
+    margin:0;
+    background:#f6f8fb;
+    font-family:"Segoe UI",Arial,sans-serif;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:240px;
+    height:100vh;
+    background:linear-gradient(180deg,#1680ae,#203a43,#2c5364);
+}
+
+.brand-text{
+    padding:28px 20px;
+    border-bottom:1px solid rgba(255,255,255,.1);
+}
+.brand-text h3{color:#fff;margin:0;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px;margin-top:4px}
+
+.menu{padding:16px 0}
+.menu li{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 22px;
+    margin:6px 12px;
+    border-radius:10px;
+    color:#e0e0e0;
+    cursor:pointer;
+}
+.menu li:hover{background:rgba(255,255,255,.12);transform:translateX(4px)}
+.menu li.active{background:#fff;color:#203a43;font-weight:600}
+.menu li.logout{
+    margin-top:22px;
+    border-top:1px solid rgba(255,255,255,.15);
+    padding-top:18px;
+    color:#ffb4b4;
+}
+
+/* ===== HEADER ===== */
+.topbar{
+    position:fixed;
+    top:0;
+    left:240px;
+    right:0;
+    height:95px;
+    background:#cd8648;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 30px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    z-index:10;
+}
+
+.top-logo img{height:65px}
+
+
+
+/* ===== MAIN ===== */
+.main-content{
+    margin-left:240px;
+    padding:130px 40px 40px;
+}
+
+.page-header h2{margin:0;font-size:22px;color:#203a43}
+.page-header p{color:#6b7280;margin-top:6px}
+
+.result-box{
+    background:#fff;
+    border-radius:14px;
+    padding:30px;
+    margin-top:30px;
+    box-shadow:0 10px 26px rgba(0,0,0,.08);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+th,td{
+    border:1px solid #e2e8f0;
+    padding:12px;
+    font-size:14px;
+    text-align:center;
+}
+th{
+    background:#f1f5f9;
+    font-weight:600;
+}
+
+.subject-title{font-weight:600;margin-bottom:6px}
+.meta{font-size:13px;color:#6b7280;margin-bottom:12px}
+
+.total-row{
+    background:#203a43;
+    color:#fff;
+    font-weight:600;
+}
+
+.status{
+    text-align:center;
+    padding:60px;
+    background:#fff;
+    border-radius:14px;
+    box-shadow:0 10px 26px rgba(0,0,0,.08);
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+<div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Student Portal</p>
+</div>
+<ul class="menu">
+    <li onclick="go('studentdashboard.html')"><i class="fas fa-home"></i>Dashboard</li>
+    <li onclick="go('survey.html')"><i class="fas fa-poll"></i>Survey</li>
+    <li onclick="go('upload-video.html')"><i class="fas fa-video"></i>Upload Video</li>
+    <li class="active"><i class="fas fa-graduation-cap"></i>Academic Results</li>
+    <li onclick="go('reports.html')"><i class="fas fa-chart-line"></i>Reports</li>
+    <li onclick="go('mentor.html')"><i class="fas fa-user-tie"></i>Mentor</li>
+    <li onclick="go('feedback.html')"><i class="fas fa-comments"></i>Feedback</li>
+    <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i>Logout</li>
+</ul>
+</aside>
+
+<!-- HEADER -->
+<header class="topbar">
+<div class="top-logo">
+    <img src="../images/AU.png">
+</div>
+
+</header>
+
+<!-- MAIN -->
+<main class="main-content">
+<div class="page-header">
+    <h2>Academic Performance</h2>
+    <p>Official marks published by faculty (subject-wise)</p>
+</div>
+
+<div id="academicContainer"></div>
+</main>
+
+<script>
+function go(p){location.href="/student/"+p}
+function logout(){location.href="/student/logout"}
+function toggleProfile(){
+    const m=document.getElementById("profileMenu");
+    m.style.display=m.style.display==="block"?"none":"block";
+}
+
+/* PROFILE (NO NAME) */
+fetch("/student/dashboard/profile",{credentials:"include"})
+.then(r=>r.json())
+.then(d=>{
+    pReg.textContent=d.register_no;
+    pSection.textContent=d.section;
+    if(d.profile_image) profileImg.src=d.profile_image;
+});
+
+/* ACADEMIC DATA */
+fetch("/student/academic-marks",{credentials:"include"})
+.then(r=>r.json())
+.then(data=>{
+    const c=document.getElementById("academicContainer");
+
+    if(!Array.isArray(data)||!data.length){
+        c.innerHTML=`<div class="status"><h3>No academic data available</h3></div>`;
+        return;
+    }
+
+    const groups={};
+    data.forEach(r=>{
+        const k=`${r.subject_code}|${r.subject_name}|${r.semester}|${r.exam_phase}`;
+        if(!groups[k]) groups[k]=[];
+        groups[k].push(r);
+    });
+
+    let html="";
+    for(const k in groups){
+        const [code,name,sem,phase]=k.split("|");
+        const merged={};
+
+        groups[k].forEach(r=>{
+            Object.entries(r).forEach(([key,val])=>{
+                if(["id","register_number","subject_code","subject_name","semester","exam_phase","uploaded_at"].includes(key)) return;
+                if(typeof val==="object") return;   // 🔥 FIX: remove [object Object]
+                merged[key]=val;
+            });
+        });
+
+        html+=`
+        <div class="result-box">
+            <div class="subject-title">${code} – ${name}</div>
+            <div class="meta">Semester ${sem} | ${phase}</div>
+            <table>
+                <tr><th>Component</th><th>Marks</th></tr>
+                ${Object.entries(merged).map(([k,v])=>`
+                <tr class="${k.toLowerCase().includes('total')?'total-row':''}">
+                    <td>${k.replace(/_/g,' ').toUpperCase()}</td>
+                    <td>${v ?? '-'}</td>
+                </tr>`).join("")}
+            </table>
+        </div>`;
+    }
+    c.innerHTML=html;
+});
+</script>
+
+</body>
+</html>

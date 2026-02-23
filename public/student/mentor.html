@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Mentor | Alliance University</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../dean/deandashboard.css">
+
+<style>
+body{
+    margin:0;
+    background:#f6f8fb;
+    font-family:"Segoe UI",Arial,sans-serif;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+    position:fixed;
+    left:0;top:0;
+    width:240px;height:100vh;
+    background:linear-gradient(180deg,#1680ae,#203a43,#2c5364);
+    box-shadow:2px 0 12px rgba(0,0,0,.25);
+}
+.brand-text{
+    padding:28px 20px;
+    border-bottom:1px solid rgba(255,255,255,.1);
+}
+.brand-text h3{color:#fff;margin:0;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px;margin-top:4px}
+
+.menu{padding:16px 0}
+.menu li{
+    display:flex;align-items:center;gap:14px;
+    padding:14px 22px;margin:6px 12px;
+    border-radius:10px;color:#e0e0e0;
+    cursor:pointer;transition:.25s;
+}
+.menu li:hover{background:rgba(255,255,255,.12);transform:translateX(4px)}
+.menu li.active{background:#fff;color:#203a43;font-weight:600}
+.menu li.logout{
+    margin-top:22px;
+    border-top:1px solid rgba(255,255,255,.15);
+    padding-top:18px;color:#ffb4b4;
+}
+
+/* ===== HEADER ===== */
+.topbar{
+    position:fixed;
+    top:0;left:240px;right:0;
+    height:95px;
+    background:#cd8648;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    z-index:10;
+}
+.topbar img{height:65px}
+
+/* ===== MAIN ===== */
+.main-content{
+    margin-left:240px;
+    padding:130px 40px 40px;
+}
+
+/* ===== MENTOR CARD ===== */
+.mentor-box{
+    max-width:900px;
+    margin:auto;
+    background:#fff;
+    padding:40px;
+    border-radius:14px;
+    box-shadow:0 10px 26px rgba(0,0,0,.08);
+}
+
+.mentor-header{
+    display:flex;
+    align-items:center;
+    gap:28px;
+    padding-bottom:26px;
+    border-bottom:1px solid #e5e7eb;
+    margin-bottom:30px;
+}
+.mentor-header img{
+    width:120px;height:120px;
+    border-radius:50%;
+    object-fit:cover;
+    border:4px solid #cd8648;
+}
+.mentor-header h2{
+    margin:0;
+    font-size:24px;
+    color:#203a43;
+    font-weight:600;
+}
+.mentor-header p{
+    margin-top:6px;
+    font-size:14px;
+    color:#6b7280;
+}
+
+/* ===== DETAILS GRID ===== */
+.mentor-details{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:22px;
+}
+.detail-box{
+    background:#f8fafc;
+    padding:18px 22px;
+    border-radius:10px;
+    border-left:4px solid #1680ae;
+}
+.detail-box label{
+    display:block;
+    font-size:12px;
+    color:#6b7280;
+    margin-bottom:6px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+.detail-box span{
+    font-size:15px;
+    font-weight:600;
+    color:#1f2937;
+}
+
+/* ===== EMPTY STATE ===== */
+.no-mentor{
+    text-align:center;
+    padding:70px 20px;
+    color:#6b7280;
+}
+.no-mentor i{
+    font-size:48px;
+    color:#cbd5e1;
+}
+.no-mentor p{
+    margin-top:18px;
+    font-size:15px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+<div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Student Portal</p>
+</div>
+
+<ul class="menu">
+    <li onclick="go('studentdashboard.html')"><i class="fas fa-home"></i>Dashboard</li>
+    <li onclick="go('survey.html')"><i class="fas fa-poll"></i>Survey</li>
+    <li onclick="go('upload-video.html')"><i class="fas fa-video"></i>Upload Video</li>
+    <li onclick="go('studentacademicdata.html')"><i class="fas fa-graduation-cap"></i>Academic Results</li>
+    <li onclick="go('reports.html')"><i class="fas fa-chart-line"></i>Reports</li>
+    <li onclick="go('feedback.html')"><i class="fas fa-comments"></i>Feedback</li>
+    <li class="active"><i class="fas fa-user-tie"></i>Mentor</li>
+    <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i>Logout</li>
+</ul>
+</aside>
+
+<!-- HEADER -->
+<header class="topbar">
+    <img src="../images/AU.png" alt="Alliance University">
+</header>
+
+<!-- MAIN -->
+<main class="main-content">
+<section class="mentor-box" id="mentorBox"></section>
+</main>
+
+<script src="/js/authFetch.js"></script>
+
+<script>
+const DEFAULT_IMG="https://i.postimg.cc/zfvsMNjZ/profileicon.jpg";
+
+function go(p){location.href="/student/"+p}
+function logout(){location.href="/student/logout"}
+
+fetch("/student/mentor",)
+.then(r=>{
+    if(!r.ok) throw 0;
+    return r.json();
+})
+.then(m=>{
+    mentorBox.innerHTML=`
+    <div class="mentor-header">
+        <img src="${m.profile_image||DEFAULT_IMG}">
+        <div>
+            <h2>${m.designation}. ${m.full_name}</h2>
+            <p>${m.department}</p>
+        </div>
+    </div>
+
+    <div class="mentor-details">
+        <div class="detail-box">
+            <label>Email</label>
+            <span>${m.email}</span>
+        </div>
+
+        <div class="detail-box">
+            <label>Mobile</label>
+            <span>${m.phone}</span>
+        </div>
+
+        <div class="detail-box">
+            <label>Course</label>
+            <span>${m.course}</span>
+        </div>
+
+        <div class="detail-box">
+            <label>Section</label>
+            <span>${m.section}</span>
+        </div>
+    </div>`;
+})
+.catch(()=>{
+    mentorBox.innerHTML=`
+    <div class="no-mentor">
+        <i class="fas fa-user-slash"></i>
+        <p>No mentor assigned for your section yet</p>
+    </div>`;
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Management | Alliance University</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="deandashboard.css">
+
+<style>
+
+/* ================= PAGE HEADER ================= */
+.page-header{
+  padding:30px 40px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.page-header h2{ font-size:22px; }
+
+/* ================= PRIMARY BUTTON ================= */
+.primary-btn{
+  background:#1680ae;
+  color:#fff;
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  font-size:14px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  box-shadow:0 6px 16px rgba(22,128,174,0.35);
+}
+.primary-btn:hover{ background:#126892; }
+
+/* ================= FILTER BAR ================= */
+.filters{
+  display:flex;
+  gap:12px;
+  padding:0 40px 20px;
+}
+.filters input,
+.filters select{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:14px;
+}
+
+/* ================= TABLE ================= */
+.table-card{
+  background:#fff;
+  margin:0 40px 40px;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+  overflow:hidden;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+th{
+  background:#f4f7fb;
+  padding:14px;
+  text-align:left;
+}
+td{
+  padding:14px;
+  border-bottom:1px solid #eee;
+}
+tr:hover{ background:#fafafa; }
+
+/* ================= STATUS ================= */
+.status{
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:600;
+}
+.active{ background:#e6f7ee; color:#1e8449; }
+
+/* ================= ACTION BUTTONS ================= */
+.actions{
+  display:flex;
+  gap:8px;
+}
+.icon-btn{
+  border:none;
+  background:#f1f3f6;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  cursor:pointer;
+}
+.icon-btn:hover{ transform:scale(1.1); }
+
+/* ================= MODAL ================= */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.65);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.modal-content{
+  background:#fff;
+  width:480px;
+  border-radius:18px;
+  padding:25px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.3);
+}
+.modal-content h3{ margin-bottom:15px; }
+.modal-content input{
+  width:100%;
+  padding:11px 14px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  margin-bottom:12px;
+}
+.modal-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+}
+
+/* ================= PROFILE ================= */
+.profile-upload{
+  display:flex;
+  gap:20px;
+  align-items:center;
+  margin-bottom:10px;
+}
+.profile-preview{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid #ddd;
+}
+
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+  <div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Dean Office Portal</p>
+  </div>
+  <ul class="menu">
+    <li onclick="go('/dean/dashboard')"><i class="fas fa-chart-pie"></i> Dashboard</li>
+    <li onclick="go('/dean/deanfaculty.html')"><i class="fas fa-user-tie"></i> Faculty</li>
+    <li class="active"><i class="fas fa-user-graduate"></i> Students</li>
+    <li onclick="go('/dean/deansections.html')"><i class="fas fa-layer-group"></i> Sections</li>
+    <li class="logout" onclick="go('/dean/logout')"><i class="fas fa-sign-out-alt"></i> Logout</li>
+  </ul>
+</aside>
+
+<main class="main-content">
+
+<header class="topbar">
+  <div class="top-logo"><img src="../images/AU.png"></div>
+</header>
+
+<section class="page-header">
+  <h2>Student Management</h2>
+  <div style="display:flex;gap:10px;">
+    <button class="primary-btn" onclick="openStudentModal()">
+      <i class="fas fa-plus"></i> Add Student
+    </button>
+    <button class="primary-btn" onclick="openCsvModal()">
+      <i class="fas fa-file-csv"></i> Upload CSV
+    </button>
+  </div>
+</section>
+
+<div class="filters">
+  <input id="searchInput" placeholder="Search name or register no">
+  <input id="courseFilter" placeholder="Filter by course">
+  <input id="sectionFilter" placeholder="Filter by section">
+</div>
+
+<div class="table-card">
+<table>
+<thead>
+<tr>
+  <th>Profile</th>
+  <th>Register No</th>
+  <th>Name</th>
+  <th>Course</th>
+  <th>Email</th>
+  <th>Phone</th>
+  <th>Section</th>
+  <th>Status</th>
+  <th>Actions</th>
+</tr>
+</thead>
+<tbody id="studentTable"></tbody>
+</table>
+</div>
+
+</main>
+
+<!-- STUDENT MODAL -->
+<div id="studentModal" class="modal">
+  <div class="modal-content">
+    <h3 id="studentModalTitle">Add Student</h3>
+
+    <div class="profile-upload">
+      <img id="profilePreview" class="profile-preview" src="https://via.placeholder.com/90">
+      <input type="file" id="s_image" accept="image/*" onchange="previewImage()">
+    </div>
+
+    <input id="s_reg" placeholder="Register Number">
+    <input id="s_name" placeholder="Student Name">
+    <input id="s_course" placeholder="Course">
+    <input id="s_email" placeholder="Email">
+    <input id="s_phone" placeholder="Phone">
+    <input id="s_section" placeholder="Section">
+
+    <div class="modal-footer">
+      <button onclick="closeStudentModal()">Cancel</button>
+      <button class="primary-btn" onclick="saveStudent()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CSV MODAL -->
+<div id="csvModal" class="modal">
+  <div class="modal-content">
+    <h3>Upload Students CSV</h3>
+    <input type="file" id="csvFile" accept=".csv">
+    <div class="modal-footer">
+      <button onclick="closeCsvModal()">Cancel</button>
+      <button class="primary-btn" onclick="uploadCsv()">Upload</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let students=[], editStudentId=null;
+
+/* DOM CACHE */
+const studentModal=document.getElementById("studentModal");
+const csvModal=document.getElementById("csvModal");
+const studentTable=document.getElementById("studentTable");
+
+function go(p){ location.href=p }
+
+function previewImage(){
+  profilePreview.src=URL.createObjectURL(s_image.files[0]);
+}
+
+/* LOAD */
+function loadStudents(){
+fetch("/dean/students")
+.then(r=>r.json())
+.then(data=>{
+students=data.filter(s=>s.status==="ACTIVE");
+renderTable();
+});
+}
+
+function renderTable(){
+const q=searchInput.value.toLowerCase();
+const c=courseFilter.value.toLowerCase();
+const s=sectionFilter.value.toLowerCase();
+
+studentTable.innerHTML="";
+students
+.filter(x =>
+ (!q || x.full_name.toLowerCase().includes(q) || x.register_no.toLowerCase().includes(q)) &&
+ (!c || (x.course||"").toLowerCase().includes(c)) &&
+ (!s || (x.section||"").toLowerCase().includes(s))
+)
+.forEach(st=>{
+studentTable.innerHTML+=`
+<tr>
+<td><img src="${st.profile_image||'https://via.placeholder.com/40'}" style="width:40px;height:40px;border-radius:50%"></td>
+<td>${st.register_no}</td>
+<td>${st.full_name}</td>
+<td>${st.course||"-"}</td>
+<td>${st.email||"-"}</td>
+<td>${st.phone||"-"}</td>
+<td>${st.section||"-"}</td>
+<td><span class="status active">ACTIVE</span></td>
+<td>
+<div class="actions">
+<button class="icon-btn" onclick='editStudent(${JSON.stringify(st)})'><i class="fas fa-edit"></i></button>
+<button class="icon-btn" onclick="deactivateStudent('${st.id}')"><i class="fas fa-trash"></i></button>
+</div>
+</td>
+</tr>`;
+});
+}
+
+/* MODAL */
+function openStudentModal(){
+editStudentId=null;
+studentModalTitle.innerText="Add Student";
+s_reg.value=s_name.value=s_course.value=s_email.value=s_phone.value=s_section.value="";
+profilePreview.src="https://via.placeholder.com/90";
+studentModal.style.display="flex";
+}
+function closeStudentModal(){ studentModal.style.display="none"; }
+
+function editStudent(s){
+editStudentId=s.id;
+studentModalTitle.innerText="Edit Student";
+s_reg.value=s.register_no;
+s_name.value=s.full_name;
+s_course.value=s.course||"";
+s_email.value=s.email||"";
+s_phone.value=s.phone||"";
+s_section.value=s.section||"";
+profilePreview.src=s.profile_image||"https://via.placeholder.com/90";
+studentModal.style.display="flex";
+}
+
+/* SAVE */
+function saveStudent(){
+const fd=new FormData();
+["register_no","full_name","course","email","phone","section"].forEach((k,i)=>{
+fd.append(k,[s_reg,s_name,s_course,s_email,s_phone,s_section][i].value);
+});
+if(s_image.files[0]) fd.append("profile_image",s_image.files[0]);
+
+fetch(editStudentId?`/dean/students/${editStudentId}`:"/dean/students",
+{method:editStudentId?"PUT":"POST",body:fd})
+.then(()=>{ closeStudentModal(); loadStudents(); });
+}
+
+/* DELETE */
+function deactivateStudent(id){
+if(!confirm("Deactivate student?")) return;
+fetch(`/dean/students/${id}`,{method:"DELETE"}).then(loadStudents);
+}
+
+/* CSV */
+function openCsvModal(){ csvModal.style.display="flex"; }
+function closeCsvModal(){ csvModal.style.display="none"; }
+function uploadCsv(){
+const fd=new FormData();
+fd.append("csv",csvFile.files[0]);
+fetch("/dean/students/upload-csv",{method:"POST",body:fd})
+.then(()=>{ closeCsvModal(); loadStudents(); });
+}
+
+/* FILTER EVENTS */
+searchInput.oninput=courseFilter.oninput=sectionFilter.oninput=renderTable;
+
+loadStudents();
+</script>
+
+</body>
+</html>

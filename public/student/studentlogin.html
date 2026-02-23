@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Student Login | Alliance University</title>
+
+    <!-- Reuse existing login CSS -->
+    <link rel="stylesheet" href="../dean/dean_login.css">
+</head>
+
+<body>
+
+    <!-- Background Overlay -->
+    <div class="overlay"></div>
+
+    <!-- Login Container -->
+    <div class="login-wrapper">
+        <div class="login-box">
+
+            <!-- Logo -->
+            <img src="../images/AU.png" class="logo" alt="Alliance University Logo">
+
+            <!-- Heading -->
+            <h1>Student Login</h1>
+            <p class="tagline">Alliance University Student Portal</p>
+
+            <!-- Login Form -->
+            <form id="studentLoginForm" novalidate>
+
+                <input type="text" id="register_no" placeholder="Registration Number (2022BCSE07AED553)" required>
+
+                <input type="password" id="password" placeholder="Password" required>
+
+                <!-- Error Message -->
+                <div id="errorMsg" class="error-message"></div>
+
+                <button type="submit">Login</button>
+            </form>
+
+            <!-- Forgot Password -->
+            <p class="note" style="margin-top:18px;">
+                Forgot your password?
+                <a href="/student/change_password" class="forgot-link">
+                    click here
+                </a>
+                to reset your password.
+            </p>
+
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        const form = document.getElementById("studentLoginForm");
+        const errorMsg = document.getElementById("errorMsg");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = "none";
+
+            const registerNo = document.getElementById("register_no").value.trim();
+            const password = document.getElementById("password").value;
+
+            if (!registerNo || !password) {
+                errorMsg.textContent =
+                    "Registration number and password are required.";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            try {
+                const res = await fetch("/student/login", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        register_no: registerNo,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorMsg.textContent =
+                        data.error || "Invalid registration number or password.";
+                    errorMsg.style.display = "block";
+                    return;
+                }
+
+                // ✅ FINAL REDIRECT (STATIC DASHBOARD)
+                window.location.href = "/student/studentdashboard.html";
+
+            } catch (err) {
+                console.error(err);
+                errorMsg.textContent =
+                    "Server error. Please try again later.";
+                errorMsg.style.display = "block";
+            }
+        });
+    </script>
+
+</body>
+
+</html>

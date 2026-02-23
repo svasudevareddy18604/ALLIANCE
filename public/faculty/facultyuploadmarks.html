@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Marks Upload | Faculty Portal</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma}
+body{background:#f4f7fb}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;left:0;top:0;
+  width:240px;height:100vh;
+  background:linear-gradient(180deg,#1f4e79,#16324f,#0f2437)
+}
+.brand-text{padding:26px 20px;border-bottom:1px solid rgba(255,255,255,.15)}
+.brand-text h3{color:#fff;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px}
+.menu{list-style:none;padding:18px 0}
+.menu li{
+  padding:14px 22px;margin:6px 14px;
+  border-radius:10px;color:#e0e0e0;
+  cursor:pointer;display:flex;gap:14px
+}
+.menu li:hover{background:rgba(255,255,255,.14)}
+.menu li.active{background:#fff;color:#16324f;font-weight:600}
+.menu li.logout{
+  border-top:1px solid rgba(255,255,255,.15);
+  margin-top:18px;color:#ffb4b4
+}
+
+/* TOPBAR */
+.topbar{
+  position:fixed;top:0;left:240px;right:0;
+  height:100px;background:#b87333;
+  display:flex;align-items:center;justify-content:center;
+  z-index:10
+}
+.top-logo img{height:70px}
+
+/* MAIN */
+.main-content{
+  margin-left:240px;
+  padding:120px 40px 40px
+}
+
+/* PAGE HEADER */
+.page-header h2{font-size:22px}
+.page-header p{color:#666;margin-top:6px}
+
+/* CARD */
+.card{
+  background:#fff;
+  padding:28px;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  margin-top:26px
+}
+
+/* FORM */
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:20px
+}
+input,select{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #cbd5e1
+}
+
+/* BUTTONS */
+.primary-btn{
+  background:#1f4e79;
+  color:#fff;
+  border:none;
+  padding:10px 18px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px
+}
+.primary-btn:hover{background:#16324f}
+
+.btn{
+  background:#2563eb;color:#fff;
+  border:none;padding:6px 12px;
+  border-radius:6px;cursor:pointer
+}
+.btn.red{background:#dc2626}
+
+.actions{display:flex;gap:6px;justify-content:center}
+
+/* TABLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+  margin-top:14px
+}
+th,td{
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center
+}
+th{background:#f1f5f9}
+
+input.mark{width:70px;text-align:center}
+.readonly{background:#e5e7eb}
+
+.meta{
+  background:#f1f5f9;
+  padding:10px;
+  border-radius:8px;
+  margin:20px 0 10px;
+  font-weight:600
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Faculty Portal</p>
+  </div>
+
+  <ul class="menu">
+    <li onclick="go('/faculty/dashboard')">
+      <i class="fas fa-chart-pie"></i>Dashboard
+    </li>
+    <li onclick="go('/faculty/facultystudents.html')">
+      <i class="fas fa-user-graduate"></i>My Students
+    </li>
+    <li onclick="go('/faculty/facultyreports.html')">
+      <i class="fas fa-chart-line"></i>Reports
+    </li>
+    <li onclick="go('/faculty/facultysurvey.html')">
+      <i class="fas fa-poll"></i>Survey
+    </li>
+    <li class="active">
+      <i class="fas fa-upload"></i>Marks Upload
+    </li>
+    <li onclick="go('/faculty/faculty-feedback.html')">
+      <i class="fas fa-comments"></i>Feedback
+    </li>
+    <li onclick="go('/faculty/facultyvideo.html')">
+      <i class="fas fa-video"></i>Video
+    </li>
+    <li class="logout" onclick="go('/faculty/logout')">
+      <i class="fas fa-sign-out-alt"></i>Logout
+    </li>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<main class="main-content">
+
+<header class="topbar">
+  <div class="top-logo">
+    <img src="../images/AU.png">
+  </div>
+</header>
+
+<section class="page-header">
+  <h2>Academic Marks</h2>
+  <p>Upload and manage student academic records</p>
+</section>
+
+<div class="card">
+  <h3>Upload Academic Marks</h3><br>
+  <form id="marksForm">
+    <div class="form-grid">
+      <input name="subject_code" placeholder="Subject Code" required>
+      <input name="subject_name" placeholder="Subject Name" required>
+      <select name="semester" required>
+        <option value="">Semester</option>
+        <option>1</option><option>2</option><option>3</option><option>4</option>
+        <option>5</option><option>6</option><option>7</option><option>8</option>
+      </select>
+      <select name="exam_phase" required>
+        <option value="">Exam Phase</option>
+        <option value="DSA">DSA</option>
+        <option value="SEE">SEE</option>
+      </select>
+    </div><br>
+    <input type="file" name="file" accept=".csv,.xlsx" required><br><br>
+    <button class="primary-btn">Upload</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Uploaded Marks</h3>
+  <div id="marksContainer">Loading…</div>
+</div>
+
+</main>
+
+<script>
+function go(p){location.href=p}
+
+let validRegisters=new Set();
+
+async function loadStudents(){
+  const r=await fetch("/faculty/students",{credentials:"include"});
+  const d=await r.json();
+  validRegisters=new Set(d.map(s=>s.register_no));
+}
+
+async function loadMarks(){
+  const c=document.getElementById("marksContainer");
+  const r=await fetch("/faculty/marks",{credentials:"include"});
+  const d=await r.json();
+
+  if(!d.length){c.innerHTML="No uploaded marks found";return;}
+
+  const g={};
+  d.forEach(x=>{
+    const k=`${x.subject_code}|${x.semester}|${x.exam_phase}`;
+    (g[k]=g[k]||[]).push(x);
+  });
+
+  let h="";
+  for(const k in g){
+    const [s,sem,p]=k.split("|");
+    const rows=g[k];
+    const cols=Object.keys(rows[0]).filter(c=>
+      !["id","subject_code","subject_name","semester","exam_phase","_features"].includes(c)
+    );
+
+    h+=`
+    <div class="meta">${s} | Semester ${sem} | ${p}</div>
+    <table>
+      <thead><tr>${cols.map(c=>`<th>${c}</th>`).join("")}<th>Actions</th></tr></thead>
+      <tbody>
+      ${rows.map(r=>`
+        <tr data-id="${r.id}">
+          ${cols.map(c=>`
+            <td>${
+              c==="register_number"||c==="student_name"
+              ? `<input class="mark readonly" value="${r[c]||""}" readonly>`
+              : `<input class="mark" data-key="${c}" value="${r[c]??""}">`
+            }</td>`).join("")}
+          <td class="actions">
+            <button class="btn" onclick="saveRow(this)">Save</button>
+            <button class="btn red" onclick="deleteRow(${r.id})">Delete</button>
+          </td>
+        </tr>`).join("")}
+      </tbody>
+    </table>`;
+  }
+  c.innerHTML=h;
+}
+
+async function saveRow(btn){
+  const tr=btn.closest("tr");
+  const payload={};
+  tr.querySelectorAll("input[data-key]").forEach(i=>payload[i.dataset.key]=i.value);
+
+  await fetch("/faculty/update-mark/"+tr.dataset.id,{
+    method:"PUT",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload),
+    credentials:"include"
+  });
+}
+
+async function deleteRow(id){
+  if(!confirm("Delete this record?")) return;
+  const r=await fetch("/faculty/delete-mark/"+id,{method:"DELETE",credentials:"include"});
+  if(r.ok) loadMarks();
+}
+
+document.getElementById("marksForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const file=e.target.file.files[0];
+  const reader=new FileReader();
+
+  reader.onload=ev=>{
+    const wb=XLSX.read(ev.target.result,{type:"array"});
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    for(const r of rows){
+      if(!validRegisters.has(r.register_number)){
+        alert("Invalid register number: "+r.register_number);
+        return;
+      }
+    }
+    fetch("/faculty/upload-marks",{
+      method:"POST",
+      body:new FormData(e.target),
+      credentials:"include"
+    }).then(r=>r.ok?loadMarks():alert("Upload failed"));
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+loadStudents().then(loadMarks);
+</script>
+
+</body>
+</html>

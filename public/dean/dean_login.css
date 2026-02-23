@@ -1,0 +1,137 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: url("../images/au-back2.jpg") no-repeat center center / cover;
+}
+
+/* =========================
+   DARK OVERLAY
+========================= */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 1;
+}
+
+/* =========================
+   CENTER WRAPPER
+========================= */
+.login-wrapper {
+    position: relative;
+    z-index: 2;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* =========================
+   LOGIN BOX
+========================= */
+.login-box {
+    background: rgba(255, 255, 255, 0.97);
+    padding: 45px;
+    width: 420px;
+    /* 🔥 wider for long reg numbers */
+    border-radius: 6px;
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* =========================
+   LOGO
+========================= */
+.logo {
+    width: 240px;
+    margin-bottom: 25px;
+}
+
+/* =========================
+   TEXT
+========================= */
+.login-box h1 {
+    font-size: 22px;
+    color: #1c2b3a;
+    margin-bottom: 6px;
+}
+
+.tagline {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 28px;
+}
+
+/* =========================
+   INPUTS (FIXED)
+========================= */
+.login-box input {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.login-box input:focus {
+    outline: none;
+    border-color: #1c2b3a;
+}
+
+/* =========================
+   BUTTON (FIXED)
+========================= */
+.login-box button {
+    width: 100%;
+    padding: 13px;
+    background-color: #1c2b3a;
+    color: #fff;
+    font-size: 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-box button:hover {
+    background-color: #243b55;
+}
+
+/* =========================
+   ERROR MESSAGE
+========================= */
+.error-message {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #fdecea;
+    color: #b71c1c;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    font-size: 13px;
+    display: none;
+}
+
+/* =========================
+   FOOTER NOTE
+========================= */
+.note {
+    margin-top: 18px;
+    font-size: 12px;
+    color: #777;
+}
+
+.note a {
+    color: #1c2b3a;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.note a:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Faculty Feedback | Alliance University</title>
+
+<link rel="icon" type="image/png" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../dean/deandashboard.css">
+
+<style>
+/* ================= LAYOUT ================= */
+.sidebar{
+    position:fixed;left:0;top:0;width:240px;height:100vh;
+    background:linear-gradient(180deg,#1680ae,#203a43,#2c5364)
+}
+.topbar{
+    position:fixed;top:0;left:240px;right:0;height:100px;
+    background:#cd8648;z-index:10
+}
+.main-content{
+    margin-left:240px;
+    padding:120px 30px 40px;
+    background:#f6f8fb;
+    min-height:100vh
+}
+
+/* ================= FEEDBACK CARD ================= */
+.feedback-container{
+    max-width:900px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:18px;
+    padding:36px;
+    box-shadow:0 12px 30px rgba(0,0,0,.1)
+}
+.feedback-header{
+    border-bottom:1px solid #e5e9ef;
+    padding-bottom:18px;
+    margin-bottom:26px
+}
+.feedback-header h2{
+    color:#203a43;
+    font-size:22px
+}
+.feedback-section{
+    margin-top:26px
+}
+.feedback-section h3{
+    color:#1f4e79;
+    margin-bottom:10px;
+    font-size:17px
+}
+.feedback-section p{
+    font-size:14.5px;
+    line-height:1.7;
+    color:#333
+}
+
+/* ================= ACTION BUTTON ================= */
+.chat-btn{
+    margin-top:30px;
+    padding:12px 26px;
+    border:none;
+    border-radius:10px;
+    background:#203a43;
+    color:#fff;
+    font-size:14.5px;
+    cursor:pointer
+}
+.chat-btn i{ margin-right:8px }
+
+/* ================= EMPTY STATE ================= */
+.empty-state{
+    text-align:center;
+    padding:80px 20px;
+    display:none
+}
+.empty-state i{
+    font-size:56px;
+    color:#aaa;
+    margin-bottom:16px
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<aside class="sidebar">
+<div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Student Portal</p>
+</div>
+
+<ul class="menu">
+<li onclick="navigate('studentdashboard.html')"><i class="fas fa-home"></i><span>Dashboard</span></li>
+<li onclick="navigate('survey.html')"><i class="fas fa-poll"></i><span>Take Survey</span></li>
+<li onclick="navigate('upload-video.html')"><i class="fas fa-video"></i><span>Upload Video</span></li>
+<li onclick="navigate('studentacademicdata.html')"><i class="fas fa-graduation-cap"></i><span>Academic Results</span></li>
+<li onclick="navigate('reports.html')"><i class="fas fa-chart-line"></i><span>Reports</span></li>
+<li class="active"><i class="fas fa-comments"></i><span>Feedback</span></li>
+<li onclick="navigate('mentor.html')"><i class="fas fa-user-tie"></i><span>Mentor</span></li>
+<li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></li>
+</ul>
+</aside>
+
+<!-- ================= MAIN ================= -->
+<main class="main-content">
+
+<header class="topbar">
+<div class="top-logo">
+    <img src="../images/AU.png">
+</div>
+</header>
+
+<!-- ===== FEEDBACK CARD ===== -->
+<section id="feedbackArea" class="feedback-container" style="display:none">
+    <div class="feedback-header">
+        <h2>Faculty Feedback</h2>
+    </div>
+
+    <div id="feedbackText"></div>
+
+    <button class="chat-btn" onclick="goToChat()">
+        <i class="fas fa-comments"></i>
+        Chat with Faculty
+    </button>
+</section>
+
+<!-- ===== EMPTY STATE ===== -->
+<section id="emptyState" class="empty-state">
+    <i class="fas fa-comment-slash"></i>
+    <p>No feedback available.</p>
+</section>
+
+</main>
+
+<!-- ================= AUTH FETCH ================= -->
+<script src="/js/authFetch.js"></script>
+
+<script>
+let FEEDBACK_ID = null;
+
+/* NAV */
+function navigate(p){ location.href="/student/"+p }
+function logout(){ location.href="/student/logout" }
+
+/* CHAT */
+function goToChat(){
+    if(!FEEDBACK_ID){
+        alert("Feedback not loaded");
+        return;
+    }
+    location.href = `/student/studentchat.html?id=${FEEDBACK_ID}`;
+}
+
+/* UI HELPERS */
+function showFeedback(){
+    document.getElementById("emptyState").style.display="none";
+    document.getElementById("feedbackArea").style.display="block";
+}
+
+function showEmpty(){
+    document.getElementById("feedbackArea").style.display="none";
+    document.getElementById("emptyState").style.display="block";
+}
+
+/* LOAD FEEDBACK */
+fetch("/student/feedback")
+.then(res=>{
+    if(!res.ok) throw new Error("API failed");
+    return res.json();
+})
+.then(data=>{
+    const feedbackText =
+        data?.feedback_text ||
+        data?.data?.feedback_text ||
+        "";
+
+    if(feedbackText.trim()===""){
+        showEmpty();
+        return;
+    }
+
+    FEEDBACK_ID = data.id || data?.data?.id;
+
+    showFeedback();
+    renderFeedback(feedbackText);
+})
+.catch(err=>{
+    console.error(err);
+    showEmpty();
+});
+
+/* RENDER FEEDBACK */
+function renderFeedback(text){
+    const container = document.getElementById("feedbackText");
+    container.innerHTML="";
+
+    text.split("\n\n").forEach(block=>{
+        const div=document.createElement("div");
+        div.className="feedback-section";
+
+        if(block.includes(":")){
+            const [title,...rest]=block.split(":");
+            div.innerHTML=`<h3>${title.trim()}</h3><p>${rest.join(":").trim()}</p>`;
+        }else{
+            div.innerHTML=`<p>${block.trim()}</p>`;
+        }
+        container.appendChild(div);
+    });
+}
+</script>
+
+</body>
+</html>

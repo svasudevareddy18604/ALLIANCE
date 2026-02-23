@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Students | Faculty Portal</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma}
+body{background:#f4f7fb}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;left:0;top:0;
+  width:240px;height:100vh;
+  background:linear-gradient(180deg,#1f4e79,#16324f,#0f2437)
+}
+.brand-text{padding:26px 20px;border-bottom:1px solid rgba(255,255,255,.15)}
+.brand-text h3{color:#fff;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px}
+.menu{list-style:none;padding:18px 0}
+.menu li{
+  padding:14px 22px;margin:6px 14px;
+  border-radius:10px;color:#e0e0e0;
+  cursor:pointer;display:flex;gap:14px
+}
+.menu li:hover{background:rgba(255,255,255,.14)}
+.menu li.active{background:#fff;color:#16324f;font-weight:600}
+.menu li.logout{
+  border-top:1px solid rgba(255,255,255,.15);
+  margin-top:18px;color:#ffb4b4
+}
+
+/* TOPBAR */
+.topbar{
+  position:fixed;top:0;left:240px;right:0;
+  height:100px;background:#b87333;
+  display:flex;align-items:center;
+  justify-content:center;
+  z-index:10
+}
+.top-logo img{height:70px}
+
+/* MAIN */
+.main-content{
+  margin-left:240px;
+  padding:120px 40px 40px
+}
+
+/* PAGE HEADER */
+.page-header h2{font-size:22px}
+.page-header p{color:#666;margin-top:6px}
+
+/* TABLE */
+.faculty-table{
+  width:100%;
+  background:#fff;
+  border-radius:14px;
+  border-collapse:collapse;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  overflow:hidden
+}
+.faculty-table thead{
+  background:#1f4e79;color:#fff
+}
+.faculty-table th,
+.faculty-table td{
+  padding:14px 16px;
+  text-align:left;
+  font-size:14px
+}
+.faculty-table tbody tr{
+  border-bottom:1px solid #eee
+}
+.faculty-table tbody tr:hover{
+  background:#f7faff
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Faculty Portal</p>
+  </div>
+
+  <ul class="menu">
+    <li onclick="go('/faculty/dashboard')"><i class="fas fa-chart-pie"></i>Dashboard</li>
+    <li class="active"><i class="fas fa-user-graduate"></i>My Students</li>
+    <li onclick="go('/faculty/facultyreports.html')"><i class="fas fa-chart-line"></i>Reports</li>
+    <li onclick="go('/faculty/facultysurvey.html')"><i class="fas fa-poll"></i>Survey</li>
+    <li onclick="go('/faculty/facultyuploadmarks.html')"><i class="fas fa-upload"></i>Marks Upload</li>
+    <li onclick="go('/faculty/faculty-feedback.html')"><i class="fas fa-comments"></i>Feedback</li>
+    <li onclick="go('/faculty/facultyvideo.html')"><i class="fas fa-video"></i>Video</li>
+    <li class="logout" onclick="go('/faculty/logout')"><i class="fas fa-sign-out-alt"></i>Logout</li>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<main class="main-content">
+
+<header class="topbar">
+  <div class="top-logo">
+    <img src="../images/AU.png" alt="Alliance University">
+  </div>
+</header>
+
+<section class="page-header">
+  <h2>My Students</h2>
+  <p>Students assigned to you as mentor</p>
+</section>
+
+<section style="margin-top:26px">
+<table class="faculty-table">
+<thead>
+<tr>
+  <th>Profile</th>
+  <th>Register No</th>
+  <th>Name</th>
+  <th>Course</th>
+  <th>Section</th>
+  <th>Email</th>
+  <th>Phone</th>
+</tr>
+</thead>
+<tbody id="studentsTable"></tbody>
+</table>
+</section>
+
+</main>
+
+<script src="/js/authFetch.js"></script>
+
+<script>
+const DEFAULT_PROFILE =
+"https://image2url.com/images/1766296630960-b33463a0-3042-4646-85e2-deb80f900160.jpg";
+
+function go(p){ location.href = p }
+
+function row(msg){
+  return `<tr>
+    <td colspan="7" style="text-align:center;padding:22px;font-weight:600;color:#666">
+      ${msg}
+    </td>
+  </tr>`;
+}
+
+async function loadStudents(){
+  const tb = document.getElementById("studentsTable");
+  tb.innerHTML = row("Loading students...");
+
+  try{
+    const res = await fetch("/faculty/students",);
+    if(!res.ok) throw new Error();
+
+    const data = await res.json();
+
+    if(!Array.isArray(data) || data.length===0){
+      tb.innerHTML = row("No students allocated to you");
+      return;
+    }
+
+    tb.innerHTML = "";
+
+    data.forEach(s=>{
+      tb.innerHTML += `
+        <tr>
+          <td><img src="${s.profile_image || DEFAULT_PROFILE}"
+              style="width:36px;height:36px;border-radius:50%;object-fit:cover"></td>
+          <td>${s.register_no}</td>
+          <td>${s.full_name}</td>
+          <td>${s.course}</td>
+          <td>${s.section}</td>
+          <td>${s.email || "-"}</td>
+          <td>${s.phone || "-"}</td>
+        </tr>`;
+    });
+
+  }catch{
+    tb.innerHTML = row("Unable to load students");
+  }
+}
+
+loadStudents();
+</script>
+
+</body>
+</html>

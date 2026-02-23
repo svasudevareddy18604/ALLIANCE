@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Feedback | Alliance University</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma}
+body{background:#f4f7fb}
+
+/* SIDEBAR */
+.sidebar{
+position:fixed;left:0;top:0;width:240px;height:100vh;
+background:linear-gradient(180deg,#1f4e79,#16324f,#0f2437)
+}
+.brand-text{padding:26px 20px;border-bottom:1px solid rgba(255,255,255,.15)}
+.brand-text h3{color:#fff;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px}
+.menu{list-style:none;padding:18px 0}
+.menu li{
+padding:14px 22px;margin:6px 14px;border-radius:10px;
+color:#e0e0e0;cursor:pointer;display:flex;gap:14px
+}
+.menu li:hover{background:rgba(255,255,255,.14)}
+.menu li.active{background:#fff;color:#16324f;font-weight:600}
+.menu li.logout{
+border-top:1px solid rgba(255,255,255,.15);
+margin-top:18px;color:#ffb4b4
+}
+
+/* TOPBAR */
+.topbar{
+position:fixed;top:0;left:240px;right:0;height:100px;
+background:#b87333;display:flex;align-items:center;
+justify-content:center
+}
+.topbar img{height:70px}
+
+/* MAIN */
+.main-content{margin-left:240px;padding:130px 30px 40px}
+.container{
+max-width:1000px;margin:auto;background:#fff;border-radius:18px;
+padding:36px;box-shadow:0 14px 40px rgba(0,0,0,.1)
+}
+.back{display:inline-block;margin-bottom:24px;color:#1f4e79;font-weight:600;text-decoration:none}
+
+/* HEADER */
+.header{border-bottom:1px solid #e5e9ef;padding-bottom:18px;margin-bottom:26px}
+.header h2{color:#16324f;font-size:22px}
+.meta{color:#6b7280;font-size:14px;margin-top:6px}
+
+/* FEEDBACK */
+.feedback-section h4{margin-top:22px;color:#1f4e79}
+.feedback-section p,li{font-size:14.5px;line-height:1.7}
+.feedback-section ul{padding-left:22px}
+
+/* CHAT */
+.chat-wrapper{
+margin-top:40px;border-top:1px solid #e5e9ef;padding-top:30px
+}
+.chat-box{
+background:#f8fafc;border-radius:12px;
+padding:20px;height:340px;overflow-y:auto;
+display:flex;flex-direction:column;gap:12px
+}
+.msg{
+max-width:70%;padding:12px 14px;border-radius:14px;
+font-size:14.5px;line-height:1.6
+}
+.msg.student{
+align-self:flex-start;background:#e5ecf4;color:#1f2937;
+border-bottom-left-radius:4px
+}
+.msg.faculty{
+align-self:flex-end;background:#1f4e79;color:#fff;
+border-bottom-right-radius:4px
+}
+.time{font-size:11px;opacity:.7;margin-top:4px}
+
+/* REPLY */
+.reply-box{margin-top:20px}
+.reply-box textarea{
+width:100%;height:80px;resize:none;
+border-radius:10px;border:1px solid #cbd5e1;
+padding:12px;font-size:14px
+}
+.reply-actions{
+margin-top:10px;display:flex;justify-content:flex-end
+}
+.reply-actions button{
+padding:8px 20px;border:none;border-radius:8px;
+background:#1f4e79;color:#fff;font-size:14px;cursor:pointer
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+<div class="brand-text">
+<h3>Alliance University</h3>
+<p>Faculty Portal</p>
+</div>
+<ul class="menu">
+<li onclick="go('faculty_dashboard.html')"><i class="fas fa-chart-pie"></i>Dashboard</li>
+<li onclick="go('facultystudents.html')"><i class="fas fa-user-graduate"></i>My Students</li>
+<li class="active"><i class="fas fa-comments"></i>Feedback</li>
+<li onclick="go('facultyreports.html')"><i class="fas fa-chart-line"></i>Reports</li>
+<li onclick="go('facultysurvey.html')"><i class="fas fa-poll"></i>Survey</li>
+<li onclick="go('facultyuploadmarks.html')"><i class="fas fa-upload"></i>Marks Upload</li>
+<li onclick="go('facultyvideo.html')"><i class="fas fa-video"></i>Video</li>
+<li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i>Logout</li>
+</ul>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+<img src="../images/AU.png">
+</header>
+
+<!-- MAIN -->
+<main class="main-content">
+<div class="container">
+
+<a class="back" href="faculty-feedback.html">← Back to Feedback List</a>
+
+<div class="header">
+<h2 id="name">Loading...</h2>
+<div class="meta" id="reg"></div>
+</div>
+
+<!-- FEEDBACK REPORT -->
+<div class="feedback-section" id="feedback"></div>
+
+<!-- CHAT -->
+<div class="chat-wrapper">
+<h3 style="color:#16324f;margin-bottom:12px">Conversation</h3>
+
+<div class="chat-box" id="chatBox"></div>
+
+<div class="reply-box">
+<textarea id="replyText" placeholder="Type your reply..."></textarea>
+<div class="reply-actions">
+<button onclick="sendMessage()">Send</button>
+</div>
+</div>
+
+</div>
+</main>
+
+<script>
+/* ===============================
+   BASIC NAV
+================================ */
+function go(p){ location.href="/faculty/"+p }
+function logout(){ location.href="/faculty/logout" }
+
+/* ===============================
+   GET feedback_id FROM URL
+================================ */
+const params = new URLSearchParams(location.search);
+const feedbackId = params.get("id");
+
+/* HARD STOP IF INVALID */
+if (!feedbackId || isNaN(feedbackId)) {
+  alert("Invalid feedback page access.");
+  throw new Error("Missing or invalid feedbackId");
+}
+
+/* ===============================
+   FORMAT FEEDBACK TEXT
+================================ */
+function formatFeedback(text) {
+  feedback.innerHTML = "";
+
+  if (!text || !text.trim()) {
+    feedback.innerHTML =
+      "<p style='color:#6b7280'>No feedback generated yet.</p>";
+    return;
+  }
+
+  text.split("\n")
+    .map(l => l.trim())
+    .filter(Boolean)
+    .forEach(l => {
+      if (l.startsWith("**")) {
+        const h = document.createElement("h4");
+        h.textContent = l.replace(/\*\*/g, "");
+        feedback.appendChild(h);
+      } else {
+        const p = document.createElement("p");
+        p.textContent = l;
+        feedback.appendChild(p);
+      }
+    });
+}
+
+/* ===============================
+   LOAD FEEDBACK + STUDENT INFO
+================================ */
+async function loadFeedback() {
+  try {
+    const res = await fetch(
+      `/faculty/feedback/${feedbackId}`,
+      { credentials: "include" }
+    );
+
+    if (!res.ok) throw new Error("Invalid feedback");
+
+    const data = await res.json();
+
+    name.textContent = data.student.full_name;
+    reg.textContent =
+      "Register No: " + data.student.register_no;
+
+    formatFeedback(data.feedback_text);
+
+  } catch (err) {
+    console.error("❌ FEEDBACK LOAD ERROR:", err);
+    feedback.innerHTML =
+      "<p style='color:red'>Failed to load feedback.</p>";
+  }
+}
+
+/* ===============================
+   LOAD CHAT (ALWAYS)
+================================ */
+async function loadChat() {
+  try {
+    const res = await fetch(
+      `/faculty/chat/${feedbackId}`,
+      { credentials: "include" }
+    );
+
+    if (!res.ok) throw new Error("Chat load failed");
+
+    const data = await res.json();
+    chatBox.innerHTML = "";
+
+    if (!data.messages || data.messages.length === 0) {
+      chatBox.innerHTML =
+        "<div style='color:#6b7280;font-size:13px'>No messages yet.</div>";
+      return;
+    }
+
+    data.messages.forEach(m => {
+      const d = document.createElement("div");
+      d.className = "msg " + m.sender;
+      d.innerHTML = `
+        <div>${m.message.replace(/\n/g, "<br>")}</div>
+        <div class="time">
+          ${new Date(m.created_at).toLocaleString()}
+        </div>
+      `;
+      chatBox.appendChild(d);
+    });
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+  } catch (err) {
+    console.error("❌ CHAT LOAD ERROR:", err);
+    chatBox.innerHTML =
+      "<div style='color:red'>Failed to load chat.</div>";
+  }
+}
+
+/* ===============================
+   SEND MESSAGE
+================================ */
+async function sendMessage() {
+  const text = replyText.value.trim();
+  if (!text) return;
+
+  try {
+    const res = await fetch(
+      `/faculty/chat/${feedbackId}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ message: text })
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Message failed");
+    }
+
+    replyText.value = "";
+    loadChat();
+
+  } catch (err) {
+    console.error("❌ SEND MESSAGE ERROR:", err);
+    alert("Message failed to send.");
+  }
+}
+
+/* ===============================
+   INITIAL LOAD
+================================ */
+async function init() {
+  await loadFeedback();
+  await loadChat();
+}
+
+init();
+</script>
+
+
+</body>
+</html>

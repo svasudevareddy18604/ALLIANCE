@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Overall Performance | Alliance University</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+  --primary:#1f4e79;
+  --secondary:#cd8648;
+  --bg:#f4f6f9;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",sans-serif;}
+body{background:var(--bg);}
+
+/* Sidebar */
+.sidebar{
+  position:fixed;left:0;top:0;
+  width:240px;height:100vh;
+  background:linear-gradient(180deg,#1680ae,#203a43,#2c5364);
+}
+.sidebar h3{color:#fff;padding:20px 20px 5px;}
+.sidebar p{color:#cbd5e1;padding:0 20px 20px;font-size:12px;}
+.menu{list-style:none;}
+.menu li{
+  padding:14px 20px;
+  color:#e2e8f0;
+  cursor:pointer;
+  display:flex;gap:12px;align-items:center;
+}
+.menu li.active,.menu li:hover{
+  background:rgba(255,255,255,.15);
+  color:#fff;
+}
+
+/* Topbar */
+.topbar{
+  position:fixed;left:240px;right:0;top:0;
+  height:90px;
+  background:var(--secondary);
+  display:flex;align-items:center;justify-content:center;
+  z-index:10;
+}
+
+/* Main */
+.main{
+  margin-left:240px;
+  padding-top:120px;
+}
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:24px;
+}
+
+/* Cards */
+.card{
+  background:var(--card);
+  border-radius:18px;
+  padding:28px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  margin-bottom:24px;
+}
+
+.section-title{
+  font-size:22px;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:24px;
+  display:flex;align-items:center;gap:10px;
+}
+
+/* Summary */
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:20px;
+}
+.summary-box{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:20px;
+  text-align:center;
+}
+.summary-box span{
+  font-size:13px;color:var(--muted);
+}
+.summary-box h2{
+  margin-top:10px;
+  font-size:24px;
+  color:var(--text);
+}
+
+.badge{
+  padding:6px 18px;
+  border-radius:999px;
+  color:#fff;font-size:12px;font-weight:700;
+}
+.Excellent{background:#16a34a}
+.Good{background:#ade11e}
+.Average{background:#f59e0b}
+.Poor{background:#dc2626}
+
+/* Charts */
+.charts{
+  display:grid;
+  grid-template-columns:1fr;
+}
+.chart-box{
+  height:340px;
+}
+
+/* Buttons */
+.actions{
+  display:flex;gap:14px;margin-top:20px;
+}
+.btn{
+  border:none;
+  background:var(--primary);
+  color:#fff;
+  padding:12px 22px;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+.btn.secondary{background:#475569}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+  <h3>Alliance University</h3>
+  <p>Student Portal</p>
+  <ul class="menu">
+    <li onclick="go('studentdashboard.html')"><i class="fa fa-home"></i>Dashboard</li>
+    <li onclick="go('survey.html')"><i class="fa fa-poll"></i>Survey</li>
+    <li onclick="go('upload-video.html')"><i class="fa fa-video"></i>Video</li>
+    <li onclick="go('studentacademicdata.html')"><i class="fa fa-graduation-cap"></i>Academics</li>
+    <li class="active"><i class="fa fa-layer-group"></i>Overall</li>
+    <li onclick="go('mentor.html')"><i class="fa fa-user-tie"></i>Mentor</li>
+    <li onclick="logout()"><i class="fa fa-sign-out-alt"></i>Logout</li>
+  </ul>
+</aside>
+
+<header class="topbar">
+  <img src="../images/AU.png" height="60">
+</header>
+
+<main class="main">
+<div class="container">
+
+<div class="card">
+  <div class="section-title"><i class="fa fa-chart-line"></i>Overall Performance Summary</div>
+  <div id="summary">Loading...</div>
+
+  <div class="actions">
+    <button class="btn" onclick="go('feedback.html')">
+      <i class="fa fa-comments"></i> Feedback
+    </button>
+    <button class="btn secondary" onclick="go('reports.html')">
+      <i class="fa fa-arrow-left"></i> Back
+    </button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title"><i class="fa fa-chart-pie"></i>Performance Analytics</div>
+  <div class="charts">
+    <div class="chart-box">
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+</div>
+
+</div>
+</main>
+
+<script>
+function go(p){location.href="/student/"+p}
+function logout(){location.href="/student/logout"}
+
+async function loadOverall(){
+  const res=await fetch("/student/final-report/overall",{credentials:"include"});
+  if(!res.ok)return;
+  const d=await res.json();
+
+  document.getElementById("summary").innerHTML=`
+    <div class="summary-grid">
+      <div class="summary-box">
+        <span>Final Level</span>
+        <h2><span class="badge ${d.overall_level}">${d.overall_level}</span></h2>
+      </div>
+      <div class="summary-box"><span>Academics</span><h2>${(d.academic_confidence*100).toFixed(1)}%</h2></div>
+      <div class="summary-box"><span>Survey</span><h2>${(d.survey_confidence*100).toFixed(1)}%</h2></div>
+      <div class="summary-box"><span>Video</span><h2>${(d.video_confidence*100).toFixed(1)}%</h2></div>
+    </div>
+  `;
+
+  renderCharts(d);
+}
+
+function renderCharts(d){
+  new Chart(barChart,{
+    type:"bar",
+    data:{
+      labels:["Academics","Survey","Video"],
+      datasets:[{
+        data:[
+          d.academic_confidence*100,
+          d.survey_confidence*100,
+          d.video_confidence*100
+        ],
+        backgroundColor:["#1f4e79","#cd8648","#1680ae"]
+      }]
+    },
+    options:{
+      maintainAspectRatio:false,
+      scales:{y:{beginAtZero:true,max:100}},
+      plugins:{legend:{display:false}}
+    }
+  });
+}
+
+loadOverall();
+</script>
+
+</body>
+</html>

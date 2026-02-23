@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Survey Answers | Faculty Portal</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma}
+body{background:#f4f7fb}
+
+/* ================= SIDEBAR ================= */
+.sidebar{
+  position:fixed;left:0;top:0;
+  width:240px;height:100vh;
+  background:linear-gradient(180deg,#1f4e79,#16324f,#0f2437)
+}
+.brand-text{padding:26px 20px;border-bottom:1px solid rgba(255,255,255,.15)}
+.brand-text h3{color:#fff;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px}
+.menu{list-style:none;padding:18px 0}
+.menu li{
+  padding:14px 22px;margin:6px 14px;
+  border-radius:10px;color:#e0e0e0;
+  cursor:pointer;display:flex;gap:14px
+}
+.menu li:hover{background:rgba(255,255,255,.14)}
+.menu li.active{background:#fff;color:#16324f;font-weight:600}
+.menu li.logout{
+  border-top:1px solid rgba(255,255,255,.15);
+  margin-top:18px;color:#ffb4b4
+}
+
+/* ================= TOPBAR ================= */
+.topbar{
+  position:fixed;top:0;left:240px;right:0;
+  height:100px;background:#b87333;
+  display:flex;align-items:center;justify-content:center;
+  z-index:10
+}
+.topbar img{height:70px}
+
+/* ================= MAIN ================= */
+.main-content{
+  margin-left:240px;
+  padding:120px 40px 40px
+}
+
+/* ================= PAGE ================= */
+.page h2{margin-bottom:6px}
+.page p{color:#666;margin-bottom:20px}
+
+/* ================= CARD ================= */
+.card{
+  background:#fff;
+  padding:26px;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08)
+}
+
+/* ================= BUTTON ================= */
+.back-btn{
+  padding:9px 16px;
+  background:#1f4e79;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  margin-bottom:20px
+}
+.back-btn:hover{background:#16324f}
+
+/* ================= TABLE ================= */
+table{width:100%;border-collapse:collapse;margin-top:15px;font-size:14px}
+th,td{
+  padding:14px 16px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left
+}
+th{background:#f1f5f9;font-weight:600}
+
+/* ================= ERROR ================= */
+.error{color:#c0392b;margin-bottom:10px;font-size:14px}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Faculty Portal</p>
+  </div>
+  <ul class="menu">
+    <li onclick="go('dashboard')">
+      <i class="fas fa-chart-pie"></i>Dashboard
+    </li>
+    <li onclick="go('facultystudents.html')">
+      <i class="fas fa-user-graduate"></i>My Students
+    </li>
+    <li onclick="go('facultyreports.html')">
+      <i class="fas fa-chart-line"></i>Reports
+    </li>
+    <li class="active">
+      <i class="fas fa-poll"></i>Survey
+    </li>
+    <li onclick="go('facultyuploadmarks.html')">
+      <i class="fas fa-upload"></i>Marks Upload
+    </li>
+    <li onclick="go('faculty-feedback.html')">
+      <i class="fas fa-comments"></i>Feedback
+    </li>
+    <li onclick="go('facultyvideo.html')">
+      <i class="fas fa-video"></i>Video
+    </li>
+    <li class="logout" onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i>Logout
+    </li>
+  </ul>
+</aside>
+
+<!-- MAIN -->
+<main class="main-content">
+<header class="topbar">
+  <img src="../images/AU.png">
+</header>
+
+<section class="page">
+  <button class="back-btn" onclick="goBack()">← Back to Survey</button>
+
+  <h2>Student Survey Answers</h2>
+  <p>Detailed responses submitted by the student</p>
+
+  <div class="card">
+    <div id="error" class="error"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:60px">#</th>
+          <th>Question</th>
+          <th>Answer</th>
+        </tr>
+      </thead>
+      <tbody id="answersBody"></tbody>
+    </table>
+  </div>
+</section>
+</main>
+
+<script>
+const params = new URLSearchParams(location.search);
+const surveyId = params.get("survey_id");
+const studentId = params.get("student_id");
+
+if(!surveyId || !studentId){
+  document.getElementById("error").innerText = "Invalid survey or student.";
+}
+
+function go(p){ location.href="/faculty/"+p }
+function logout(){ location.href="/faculty/logout" }
+function goBack(){ history.back() }
+
+async function loadAnswers(){
+  try{
+    const res = await fetch(
+      `/faculty/surveys/${surveyId}/student/${studentId}/answers`,
+      {credentials:"include"}
+    );
+
+    if(!res.ok) throw new Error();
+
+    const data = await res.json();
+    const tb = document.getElementById("answersBody");
+
+    if(!data.length){
+      document.getElementById("error").innerText = "No answers found.";
+      return;
+    }
+
+    tb.innerHTML = data.map((r,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${r.question_text}</td>
+        <td>${r.answer_text}</td>
+      </tr>
+    `).join("");
+
+  }catch{
+    document.getElementById("error").innerText = "Unable to load student answers.";
+  }
+}
+
+loadAnswers();
+</script>
+
+</body>
+</html>

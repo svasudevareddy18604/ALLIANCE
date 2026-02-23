@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Faculty Feedback | Alliance University</title>
+
+<link rel="icon" href="https://i.postimg.cc/ydqLPCpT/AULOGOOLD.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma}
+body{background:#f4f7fb}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+position:fixed;left:0;top:0;width:240px;height:100vh;
+background:linear-gradient(180deg,#1f4e79,#16324f,#0f2437)
+}
+.brand-text{padding:26px 20px;border-bottom:1px solid rgba(255,255,255,.15)}
+.brand-text h3{color:#fff;font-size:18px}
+.brand-text p{color:#cfd8dc;font-size:13px}
+
+.menu{list-style:none;padding:18px 0}
+.menu li{
+padding:14px 22px;margin:6px 14px;border-radius:10px;
+color:#e0e0e0;cursor:pointer;display:flex;gap:14px
+}
+.menu li.active{background:#fff;color:#16324f;font-weight:600}
+.menu li:hover{background:rgba(255,255,255,.14)}
+.menu li.logout{
+border-top:1px solid rgba(255,255,255,.15);
+margin-top:18px;color:#ffb4b4
+}
+
+/* ===== TOPBAR ===== */
+.topbar{
+position:fixed;top:0;left:240px;right:0;height:90px;
+background:#b87333;display:flex;align-items:center;justify-content:center
+}
+.topbar img{height:65px}
+
+/* ===== MAIN ===== */
+.main-content{margin-left:240px;padding:120px 30px}
+
+.card{
+background:#fff;border-radius:16px;
+box-shadow:0 12px 30px rgba(0,0,0,.1);
+padding:26px
+}
+.card-header{margin-bottom:20px}
+.card h2{color:#16324f}
+
+/* ===== TABLE ===== */
+table{width:100%;border-collapse:collapse}
+th,td{padding:14px;font-size:14px}
+th{background:#f1f4f8}
+tr:not(:last-child){border-bottom:1px solid #eee}
+
+/* ===== BADGES ===== */
+.badge{
+padding:5px 14px;border-radius:14px;
+font-size:12px;font-weight:600
+}
+.done{background:#c8f7c5;color:#1e6b1e}
+.pending{background:#ffeaa7;color:#6c5c00}
+
+/* ===== BUTTONS ===== */
+.btn{
+padding:7px 16px;border:none;border-radius:8px;
+cursor:pointer;font-size:13px;font-weight:600
+}
+.btn-gen{background:#0f6b3d;color:#fff}
+.btn-view{background:#1f4e79;color:#fff}
+.btn:disabled{background:#999;cursor:not-allowed}
+.btn + .btn{margin-left:6px}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand-text">
+    <h3>Alliance University</h3>
+    <p>Faculty Portal</p>
+  </div>
+  <ul class="menu">
+    <li onclick="nav('faculty_dashboard.html')"><i class="fas fa-chart-pie"></i>Dashboard</li>
+    <li onclick="nav('facultystudents.html')"><i class="fas fa-user-graduate"></i>My Students</li>
+    <li onclick="nav('facultyreports.html')"><i class="fas fa-chart-line"></i>Reports</li>
+    <li onclick="nav('facultysurvey.html')"><i class="fas fa-poll"></i>Survey</li>
+    <li onclick="nav('facultyuploadmarks.html')"><i class="fas fa-upload"></i>Marks Upload</li>
+    <li class="active"><i class="fas fa-comments"></i>Feedback</li>
+    <li onclick="nav('facultyvideo.html')"><i class="fas fa-video"></i>Video</li>
+    <li class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i>Logout</li>
+  </ul>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <img src="../images/AU.png">
+</header>
+
+<!-- CONTENT -->
+<main class="main-content">
+  <div class="card">
+    <div class="card-header">
+      <h2>Student Feedback (PDF + Email)</h2>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Register No</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+/* ===============================
+   LOAD FEEDBACK TABLE
+================================ */
+async function loadData() {
+  const tb = document.getElementById("tableBody");
+  tb.innerHTML = "<tr><td colspan='4'>Loading...</td></tr>";
+
+  try {
+    const res = await fetch("/faculty/feedback", { credentials: "include" });
+    if (!res.ok) throw new Error("Failed to load feedback list");
+
+    const data = await res.json();
+    tb.innerHTML = "";
+
+    if (!Array.isArray(data) || data.length === 0) {
+      tb.innerHTML = "<tr><td colspan='4'>No feedback found</td></tr>";
+      return;
+    }
+
+    data.forEach(s => {
+      const done = !!s.feedback_text;
+
+      /* HARD GUARD: feedback_id MUST exist if done */
+      if (done && !s.feedback_id) {
+        console.error("❌ Missing feedback_id for row:", s);
+        return;
+      }
+
+      tb.innerHTML += `
+        <tr>
+          <td>${s.full_name}</td>
+          <td>${s.register_no}</td>
+          <td>
+            <span class="badge ${done ? "done" : "pending"}">
+              ${done ? "Generated & Emailed" : "Pending"}
+            </span>
+          </td>
+          <td>
+            ${
+              done
+                ? `
+                  <button class="btn btn-view"
+                          onclick="viewFeedback(${s.feedback_id})">
+                    View
+                  </button>
+                  <button class="btn" disabled>Completed</button>
+                `
+                : `
+                  <button class="btn btn-gen"
+                          onclick="generateAndSend(this, ${s.student_id})">
+                    Generate & Email
+                  </button>
+                `
+            }
+          </td>
+        </tr>
+      `;
+    });
+
+  } catch (err) {
+    console.error("❌ LOAD DATA ERROR:", err);
+    tb.innerHTML = "<tr><td colspan='4'>Failed to load data</td></tr>";
+  }
+}
+
+/* ===============================
+   GENERATE → PDF → EMAIL
+   (USES student_id — CORRECT)
+================================ */
+async function generateAndSend(btn, studentId) {
+  if (!confirm("Generate feedback, create PDF and email student?")) return;
+
+  btn.disabled = true;
+  btn.innerText = "Processing...";
+
+  try {
+    const genRes = await fetch(
+      `/faculty/feedback/generate/${studentId}`,
+      { method: "POST", credentials: "include" }
+    );
+    if (!genRes.ok) throw new Error("Feedback generation failed");
+
+    const mailRes = await fetch(
+      `/faculty/feedback-email/send/${studentId}`,
+      { method: "POST", credentials: "include" }
+    );
+    if (!mailRes.ok) throw new Error("Email sending failed");
+
+    loadData();
+
+  } catch (err) {
+    console.error("❌ GENERATE / EMAIL ERROR:", err);
+    alert("Failed. Feedback may be generated, but email was not sent.");
+    btn.disabled = false;
+    btn.innerText = "Generate & Email";
+  }
+}
+
+/* ===============================
+   VIEW FEEDBACK + CHAT
+   (USES feedback_id — CRITICAL)
+================================ */
+function viewFeedback(feedbackId) {
+  if (!feedbackId) {
+    alert("Invalid feedback ID");
+    return;
+  }
+  location.href =
+    `/faculty/facultystudentfeedback.html?id=${feedbackId}`;
+}
+
+/* ===============================
+   NAVIGATION
+================================ */
+function nav(p) {
+  location.href = "/faculty/" + p;
+}
+
+function logout() {
+  location.href = "/faculty/logout";
+}
+
+/* ===============================
+   INIT
+================================ */
+loadData();
+</script>
+
+
+
+</body>
+</html>
