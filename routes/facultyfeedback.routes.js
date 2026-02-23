@@ -4,10 +4,18 @@ const Groq = require("groq-sdk");
 
 const router = express.Router();
 
-/* ================= GROQ CLIENT ================= */
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
-});
+/* =====================================================
+   SAFE GROQ CLIENT (LAZY INIT – NO CRASH AT STARTUP)
+===================================================== */
+function getGroqClient() {
+  const apiKey = process.env.GROQ_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("GROQ_API_KEY environment variable is missing.");
+  }
+
+  return new Groq({ apiKey });
+}
 
 /* ================= AUTH ================= */
 router.use((req, res, next) => {
@@ -33,99 +41,115 @@ function qualitativeLevel(value) {
 }
 
 /* =====================================================
-   1. FEEDBACK LIST (RETURNS feedback_id ✅)
+   1. FEEDBACK LIST
 ===================================================== */
 router.get("/", async (req, res) => {
-  const facultyId = req.session.faculty.id;
+  try {
+    const facultyId = req.session.faculty.id;
 
-  const [rows] = await db.query(`
-    SELECT 
-      s.id AS student_id,
-      s.full_name,
-      s.register_no,
-      f.id AS feedback_id,
-      f.feedback_text,
-      f.generated_at
-    FROM mentors m
-    JOIN students s
-      ON s.course = m.course
-     AND s.section = m.section
-    LEFT JOIN student_feedback f
-      ON f.student_id = s.id
-    WHERE m.faculty_id = ?
-    ORDER BY s.full_name
-  `, [facultyId]);
+    const [rows] = await db.query(`
+      SELECT 
+        s.id AS student_id,
+        s.full_name,
+        s.register_no,
+        f.id AS feedback_id,
+        f.feedback_text,
+        f.generated_at
+      FROM mentors m
+      JOIN students s
+        ON s.course = m.course
+       AND s.section = m.section
+      LEFT JOIN student_feedback f
+        ON f.student_id = s.id
+      WHERE m.faculty_id = ?
+      ORDER BY s.full_name
+    `, [facultyId]);
 
-  res.json(rows);
+    res.json(rows);
+  } catch (err) {
+    console.error("Feedback list error:", err);
+    res.status(500).json({ error: "Failed to fetch feedback list" });
+  }
 });
 
 /* =====================================================
-   2. SINGLE FEEDBACK VIEW (BY feedback_id ✅ FIX)
+   2. SINGLE FEEDBACK VIEW
 ===================================================== */
 router.get("/:feedbackId", async (req, res) => {
-  const facultyId = req.session.faculty.id;
-  const feedbackId = req.params.feedbackId;
+  try {
+    const facultyId = req.session.faculty.id;
+    const feedbackId = req.params.feedbackId;
 
-  const [[row]] = await db.query(`
-    SELECT
-      f.id AS feedback_id,
-      f.feedback_text,
-      f.generated_at,
-      s.id AS student_id,
-      s.full_name,
-      s.register_no
-    FROM student_feedback f
-    JOIN students s ON s.id = f.student_id
-    JOIN mentors m
-      ON s.course = m.course
-     AND s.section = m.section
-    WHERE m.faculty_id = ?
-      AND f.id = ?
-  `, [facultyId, feedbackId]);
+    const [[row]] = await db.query(`
+      SELECT
+        f.id AS feedback_id,
+        f.feedback_text,
+        f.generated_at,
+        s.id AS student_id,
+        s.full_name,
+        s.register_no
+      FROM student_feedback f
+      JOIN students s ON s.id = f.student_id
+      JOIN mentors m
+        ON s.course = m.course
+       AND s.section = m.section
+      WHERE m.faculty_id = ?
+        AND f.id = ?
+    `, [facultyId, feedbackId]);
 
-  if (!row) {
-    return res.status(404).json({ error: "Feedback not found" });
-  }
-
-  res.json({
-    feedback_id: row.feedback_id,
-    feedback_text: row.feedback_text,
-    generated_at: row.generated_at,
-    student: {
-      id: row.student_id,
-      full_name: row.full_name,
-      register_no: row.register_no
+    if (!row) {
+      return res.status(404).json({ error: "Feedback not found" });
     }
-  });
+
+    res.json({
+      feedback_id: row.feedback_id,
+      feedback_text: row.feedback_text,
+      generated_at: row.generated_at,
+      student: {
+        id: row.student_id,
+        full_name: row.full_name,
+        register_no: row.register_no
+      }
+    });
+
+  } catch (err) {
+    console.error("Single feedback error:", err);
+    res.status(500).json({ error: "Failed to fetch feedback" });
+  }
 });
 
 /* =====================================================
-   3. GENERATE FEEDBACK (STUDENT BASED – UNCHANGED)
+   3. GENERATE FEEDBACK
 ===================================================== */
 router.post("/generate/:studentId", async (req, res) => {
-  const facultyId = req.session.faculty.id;
-  const studentId = req.params.studentId;
+  try {
+    const facultyId = req.session.faculty.id;
+    const studentId = req.params.studentId;
 
-  const [[allowed]] = await db.query(`
-    SELECT 1
-    FROM mentors m
-    JOIN students s
-      ON s.course = m.course
-     AND s.section = m.section
-    WHERE m.faculty_id = ?
-      AND s.id = ?
-  `, [facultyId, studentId]);
+    const [[allowed]] = await db.query(`
+      SELECT 1
+      FROM mentors m
+      JOIN students s
+        ON s.course = m.course
+       AND s.section = m.section
+      WHERE m.faculty_id = ?
+        AND s.id = ?
+    `, [facultyId, studentId]);
 
-  if (!allowed) {
-    return res.status(403).json({ error: "Access denied" });
+    if (!allowed) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const data = await collectStudentData(studentId);
+    const feedback = await generateAIFeedback(data);
+    await saveFeedback(studentId, feedback, facultyId);
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("Generate feedback error:", err.message);
+    res.status(500).json({ error: err.message });
   }
-
-  const data = await collectStudentData(studentId);
-  const feedback = await generateAIFeedback(data);
-
-  await saveFeedback(studentId, feedback, facultyId);
-
-  res.json({ success: true });
 });
 
 /* ================= DATA COLLECTION ================= */
@@ -192,7 +216,7 @@ async function collectStudentData(studentId) {
   };
 }
 
-/* ================= PROMPT (UNCHANGED) ================= */
+/* ================= PROMPT ================= */
 function buildPrompt(d) {
   return `
 You are a university academic evaluator.
@@ -222,7 +246,9 @@ ${d.overall}
 
 /* ================= AI ================= */
 async function generateAIFeedback(data) {
-  const res = await groq.chat.completions.create({
+  const groq = getGroqClient();
+
+  const response = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
     temperature: 0.1,
     messages: [
@@ -231,7 +257,7 @@ async function generateAIFeedback(data) {
     ]
   });
 
-  return res.choices[0].message.content.trim();
+  return response.choices[0].message.content.trim();
 }
 
 /* ================= SAVE ================= */
